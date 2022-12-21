@@ -40,6 +40,8 @@ xdata = xdata %>%
   # Change name of column to not have "_"
   mutate(GS.ppet = GS_ppet) %>%
   select(-GS_ppet) %>%
+  # Remove one of the correlated predictor variables
+  select(-mean.SIL) %>%
   # Add unique ID numbers to rownames
   column_to_rownames(var = 'uniqueID')
 
@@ -50,10 +52,26 @@ ydata = ydata %>%
   select(-c(`No data`, Water, `Unknown tree`, `NA`)) %>%
   column_to_rownames(var = 'uniqueID')
 
+# Remove columns with no information
+zeros <- apply(ydata, 1, sum)
+zeros <- which(zeros == 0)
+
+ydata <- ydata[-zeros,]
+xdata <- xdata[-zeros,]
+
 # Add edata
 # Since all observations were made in the exact same way, effort will be equal
 # Therefore, just make a vector of 1s
-edata = rep(1, length = nrow(xdata))
+#edata = rep(1, length = nrow(xdata))
+
+# Alternative: make effort equal to distance
+load('test/effort.RData')
+# This could be either species-specific effort at each site or an average effort
+#edata <- site_effort
+#edata <- edata[-zeros]
+
+edata <- effort
+edata <- edata[-zeros,]
 
 # And reformat
 elist = list(columns = 1:ncol(ydata),
@@ -65,7 +83,7 @@ elist = list(columns = 1:ncol(ydata),
 # Presence/absence at each site is a function of each of the environmental covariates
 # with no interactions
 form1 = as.formula(~ mean.SlopeProjected + mean.AspectProjected + mean.CAC +
-                    mean.CEC + mean.CLA + mean.KSA + mean.SAN + mean.SIL +
+                    mean.CEC + mean.CLA + mean.KSA + mean.SAN +
                     mean.WAT + mean.SWI + Hydric + Floodplain + totalPPT +
                     MeanTEMP + GS.ppet)
 
