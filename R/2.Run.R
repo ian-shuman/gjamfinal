@@ -11,7 +11,7 @@ require(gjam, lib.loc = '~/Rlibs')
 ## Change only these variables ##
 setwd('~/gjam/run/')
 effort_type <- 'site' # 'site' or 'full'
-niter <- 20
+niter <- 10
 nburn <- 5
 
 ## End changes ##
