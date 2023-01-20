@@ -40,9 +40,9 @@ print(test, n = nrow(test))
 # Since we have a category of "tulip poplar/poplar" that's much bigger,
 # let's combine the "tulip poplar" "poplar" and "tulip poplar/poplar"
 # categories
-longydata <- longydata |>
-  mutate(Taxon = replace(Taxon, Taxon == 'Tulip.poplar', 'Poplar.tulip.poplar'),
-         Taxon = replace(Taxon, Taxon == 'Poplar', 'Poplar.tulip.poplar'))
+#longydata <- longydata |>
+#  mutate(Taxon = replace(Taxon, Taxon == 'Tulip.poplar', 'Poplar.tulip.poplar'),
+#         Taxon = replace(Taxon, Taxon == 'Poplar', 'Poplar.tulip.poplar'))
 
 # Make sure it looks correct
 test <- longydata |>
@@ -54,10 +54,21 @@ print(test, n = nrow(test))
 # Now let's plot the number of observations of each taxon
 longydata |>
   group_by(Taxon) |>
+  mutate(Taxon = replace(Taxon, Taxon == 'No.tree', 'No tree'),
+         Taxon = replace(Taxon, Taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar'),
+         Taxon = replace(Taxon, Taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum'),
+         Taxon = replace(Taxon, Taxon == 'Other.hardwood', 'Other Hardwood'),
+         Taxon = replace(Taxon, Taxon == 'Black.gum', 'Black Gum'),
+         Taxon = replace(Taxon, Taxon == 'Sweet.gum', 'Sweet Gum'),
+         Taxon = replace(Taxon, Taxon == 'Bald.cypress', 'Bald Cypress'),
+         Taxon = replace(Taxon, Taxon == 'Tulip.poplar', 'Tulip Poplar')) |>
   summarize(count = length(which(PA == 1))) |>
   ggplot(aes(x = reorder(Taxon, count), y = count)) +
   geom_point() +
-  coord_flip()
+  coord_flip() +
+  ylab('Number of Observations') +
+  xlab('') +
+  theme_minimal()
 
 ## Based on this, I would definitely say that there is a 
 ## reasonable cut-off around "Walnut" where we could group all other
