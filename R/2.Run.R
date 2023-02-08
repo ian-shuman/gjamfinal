@@ -16,8 +16,8 @@ nburn <- 5
 
 ## End changes ##
 
-# Load data from 1.Process.R
-load('GJAM DATA/process.RData')
+# Load data from 1.5.Reduce.R
+load('GJAM DATA/process2.RData')
 load('GJAM DATA/effort.RData')
 
 # Reformat effort
@@ -32,41 +32,18 @@ elist = list(columns = 1:ncol(ydata),
 # Presence/absence at each site is a function of each of the environmental covariates
 # with no interactions
 form1 = as.formula(~ mean.SlopeProjected + mean.AspectProjected + mean.CAC +
-                     mean.CEC + mean.CLA + mean.KSA + mean.SAN +
-                     mean.WAT + mean.SWI + Hydric + Floodplain + totalPPT +
-                     MeanTEMP + GS.ppet)
-
-# Set up priors
-## This is a hack to get uninformative priors on every parameter
-## Hack starts here ##
-spLo <- "Oak"
-sp <- length(spLo)
-lo <- vector("list", sp)
-
-# add names to the list
-names(lo) <- paste0("totalPPT", spLo)
-
-# add values to the list
-lo[1] <- Inf
-
-spHi <- c('Oak')
-sp <- length(spHi)
-hi <- vector("list", sp)
-
-# add names to the list
-names(hi) <- paste0("Hydric_", spHi)
-
-# add values to the list
-hi[1:length(hi)] <- Inf
-## Hack ends here
+                     mean.CEC + mean.CLA + mean.SAN + mean.WAT + mean.SWI + 
+                     Hydric + Floodplain + totalPPT + MeanTEMP)
 
 # Make list of priors for each parameter
-prior <- gjamPriorTemplate(formula = form1,
-                           xdata = xdata, ydata = ydata,
-                           lo = lo, hi = hi)
+#prior <- gjamPriorTemplate(formula = form1,
+#                           xdata = xdata, ydata = ydata,
+#                           lo = lo, hi = hi)
+
 # Prepare & run model
-mlist = list(ng = niter, burnin = nburn, typeNames = 'PA', betaPrior = prior,
-             effort = elist, random = 'marea')
+mlist = list(ng = niter, burnin = nburn, typeNames = 'PA',
+             effort = elist, random = c('marea', 'long', 'lat'))
+
 out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
 
 # Save

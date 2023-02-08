@@ -13,7 +13,7 @@ library(tidyverse)
 ## and ensuring all columns are present in all matrices in ydata and edata
 
 # Read in file names that we need to loop over
-xfiles <- list.files('GJAM DATA/X/')
+xfiles <- list.files('GJAM DATA/X/Random Effects/')
 yfiles <- list.files('GJAM DATA/Y/')
 
 # Storage
@@ -23,7 +23,7 @@ yedata_list <- list()
 # Read in files
 for(i in 1:length(xfiles)){
   filename <- xfiles[i]
-  pathname <- paste0('GJAM DATA/X/',filename)
+  pathname <- paste0('GJAM DATA/X/Random Effects/',filename)
   xdata_list[[i]] <- read.csv(pathname)
   
   filename <- yfiles[i]
@@ -36,7 +36,7 @@ xdata <- xdata_list[[1]]
 xdata$filename <- rep(xfiles[1], times = nrow(xdata))
 
 # Unlist
-for(i in 2:length(xfiles)){
+for(i in  2:length(xfiles)){
   dat <- xdata_list[[i]]
   dat$filename <- rep(xfiles[i], times = nrow(dat))
   xdata <- rbind(xdata, dat)
@@ -127,7 +127,7 @@ rm(edata_list, xdata_list, ydata_list, yedata_list)
 # Format management area columns
 xdata <- xdata %>%
   mutate(marea = sub('_X.*', '', filename)) %>%
-  select(-filename) %>%
+  select(-c(filename, x, y)) %>%
   mutate(uniqueID = paste0(marea,'_',uniqueID))
 
 ydata <- ydata %>%
@@ -151,8 +151,7 @@ xdata = xdata %>%
          Hydric = as.factor(Hydric),
          Floodplain = as.factor(Floodplain)) %>%
   # Change name of column to not have "_"
-  mutate(GS.ppet = GS_ppet) %>%
-  select(-GS_ppet) %>%
+  select(-c(GS_ppet, mean.KSA)) %>%
   # Remove one of the correlated predictor variables
   select(-mean.SIL) %>%
   # Add unique ID numbers to rownames

@@ -10,11 +10,16 @@ library(tidyverse)
 library(corrplot)
 
 load('GJAM DATA/process.RData')
+load('GJAM DATA/effort.RData')
 
 # Make into a more usable format
 longydata <- ydata |>
   pivot_longer(cols = c(No.tree:Chestnut))
 colnames(longydata) <- c('Taxon', 'PA')
+
+longeffort <- effort |>
+  pivot_longer(cols = c(No.tree_dist:Chestnut_dist))
+colnames(longeffort) <- c('Taxon', 'Effort')
 
 # How many presences at a corner does each taxon have?
 counts <- longydata |>
@@ -95,6 +100,23 @@ longydata <- longydata |>
          Taxon = replace(Taxon, Taxon == 'Mulberry', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Black.gum', 'Other.hardwood'))
 
+## Do the same for the effort
+
+longeffort <- longeffort |>
+  mutate(Taxon = replace(Taxon, Taxon == 'Bald.cypress_dist', 'Other.conifer_dist'),
+         Taxon = replace(Taxon, Taxon == 'Pine_dist', 'Other.conifer_dist'),
+         Taxon = replace(Taxon, Taxon == 'Birch_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Tamarack_dist', 'Other.conifer_dist'),
+         Taxon = replace(Taxon, Taxon == 'Sweet.gum_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Locust_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Willow_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Cherry_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Sycamore_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Buckeye_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Hackberry_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Mulberry_dist', 'Other.hardwood_dist'),
+         Taxon = replace(Taxon, Taxon == 'Black.gum_dist', 'Other.hardwood_dist'))
+
 # Let's visualize again
 longydata |>
   group_by(Taxon) |>
@@ -130,10 +152,32 @@ new.ydata <- ydata |>
             Alder, Chestnut)) |>
   rename(Other.hardwood = Other.hardwood.2)
 
+# Redo for effort
+new.edata <- effort |>
+  # Make distance = distance of any of these categories and their average if more
+  # than one tree from more than one category is present at a given corner
+  mutate(TP_dist = mean(c(Poplar_dist, Poplar.tulip.poplar_dist, Tulip.poplar_dist), na.rm = T)) |>
+  select(-c(Poplar_dist, Poplar.tulip.poplar_dist, Tulip.poplar_dist)) |>
+  rename(Poplar.tulip.poplar_dist = TP_dist) |>
+  # Repeat for "other conifer" category
+  mutate(Other.conifer_dist = mean(c(Bald.cypress_dist, Pine_dist, Tamarack_dist, Cedar.juniper_dist), na.rm = T)) |>
+  select(-c(Bald.cypress_dist, Pine_dist, Tamarack_dist, Cedar.juniper_dist)) |>
+  # Repeat for "other hardwood category
+  mutate(Other.hardwood.2_dist = mean(c(Birch_dist, Sweet.gum_dist, Locust_dist, Willow_dist, Cherry_dist,
+                                        Sycamore_dist, Buckeye_dist, Hackberry_dist, Mulberry_dist, Black.gum_dist, Other.hardwood_dist,
+                                        Alder_dist, Chestnut_dist), na.rm = T)) |>
+  select(-c(Birch_dist, Sweet.gum_dist, Locust_dist, Willow_dist, Cherry_dist, Sycamore_dist,
+            Buckeye_dist, Hackberry_dist, Mulberry_dist, Black.gum_dist, Other.hardwood_dist,
+            Alder_dist, Chestnut_dist)) |>
+  rename(Other.hardwood_dist = Other.hardwood.2_dist)
+
 # Now, we need to make sure that we didn't create any more rows with
 # only zeros
 
-zeros <- apply(ydata, 1, sum)
+zeros <- apply(new.ydata, 1, sum)
+zeros <- which(zeros == 0)
+
+zeros <- apply(new.edata, 1, sum)
 zeros <- which(zeros == 0)
 
 # Let's make sure it looks like we think it does
@@ -148,64 +192,7 @@ new.ydata |>
 # Looks like we're good!
 
 ydata <- new.ydata
-
-## Now let's look at the xdata
-## Are there any variables that are significantly correlated?
-## We'll take out the ones that we can't use first
-xdatatest <- xdata |>
-  select(-c(Hydric, Floodplain, marea, mean.AspectProjected))
-
-# Find covariance and correlation
-xcov <- cov(xdatatest)
-xcor <- cov2cor(xcov)
-
-# Make the diagonal 0 instead of 1 just for visualization
-diag(xcor) <- 0
-
-# Visualize
-corrplot(xcor, method = 'circle')
-
-## It looks like we do have some correlated predictors:
-## mean.SlopeProjected and mean.SWI
-## mean.CLA & mean.SAN
-## MeanTEMP & GS.ppet to name a few
-## Let's look at this in numbers
-xcor <- as.data.frame(xcor)
-xcor <- xcor |>
-  rownames_to_column() |>
-  pivot_longer(cols = c(mean.SlopeProjected:GS.ppet))
-colnames(xcor) <- c('Covar1', 'Covar2', 'Corr')
-
-print.xcor <- xcor |>
-  arrange(desc(abs(Corr)))
-
-print(print.xcor, n = nrow(print.xcor))
-
-print.xcor |>
-  ggplot(aes(x = 1:nrow(print.xcor), y = Corr)) +
-  geom_point()
-
-## There are a handful of covariate pairs that have correlation > 0.5
-## These should probably be reduced
-
-## Let's just run an experiment
-## Take out MeanTEMP, mean.SAN, mean.SlopeProjected
-xcor <- xcor |>
-  filter(Covar1 != 'MeanTEMP',
-         Covar2 != 'MeanTEMP',
-         Covar1 != 'mean.SAN',
-         Covar2 != 'mean.SAN',
-         Covar1 != 'mean.SlopeProjected',
-         Covar2 != 'mean.SlopeProjected')
-
-xcor |>
-  arrange(desc(abs(Corr))) |>
-  ggplot(aes(x = 1:nrow(xcor), y = Corr)) +
-  geom_point()
-
-# Now let's put our experiment back into the data file
-xdata_red <- xdata |>
-  select(-c(MeanTEMP, mean.SAN, mean.SlopeProjected))
+edata <- new.edata
 
 # I'm going to save this in a different object for now
-save(xdata, ydata, xdata_red, file = 'GJAM DATA/process2.RData')
+save(xdata, ydata, edata, file = 'GJAM DATA/process2.RData')
