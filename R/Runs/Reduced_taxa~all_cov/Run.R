@@ -34,7 +34,8 @@ new.ydata <- ydata |>
          Forest = as.numeric(Forest)) |>
   mutate(Savanna = if_else(Savanna > 1, 1, Savanna),
          Forest = if_else(Forest > 1, 1, Forest)) |>
-  select(c(Prairie, Forest, Savanna))
+  select(c(Prairie, Forest, Savanna)) |>
+  mutate(Savanna = if_else(Savanna == 1 & Forest == 1, 0, Savanna))
 
 # Check to make sure we have something in every row
 zeros = apply(new.ydata, 1, sum)
