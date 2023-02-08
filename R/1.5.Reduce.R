@@ -90,16 +90,13 @@ longydata <- longydata |>
          Taxon = replace(Taxon, Taxon == 'Pine', 'Other.conifer'),
          Taxon = replace(Taxon, Taxon == 'Birch', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Tamarack', 'Other.conifer'),
-         Taxon = replace(Taxon, Taxon == 'Sweet.gum', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Locust', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Willow', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Cherry', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Sycamore', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Buckeye', 'Other.hardwood'),
          Taxon = replace(Taxon, Taxon == 'Hackberry', 'Other.hardwood'),
-         Taxon = replace(Taxon, Taxon == 'Mulberry', 'Other.hardwood'),
-         Taxon = replace(Taxon, Taxon == 'Black.gum', 'Other.hardwood'))
-
+         Taxon = replace(Taxon, Taxon == 'Mulberry', 'Other.hardwood'))
 ## Do the same for the effort
 
 longeffort <- longeffort |>
@@ -107,15 +104,13 @@ longeffort <- longeffort |>
          Taxon = replace(Taxon, Taxon == 'Pine_dist', 'Other.conifer_dist'),
          Taxon = replace(Taxon, Taxon == 'Birch_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Tamarack_dist', 'Other.conifer_dist'),
-         Taxon = replace(Taxon, Taxon == 'Sweet.gum_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Locust_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Willow_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Cherry_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Sycamore_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Buckeye_dist', 'Other.hardwood_dist'),
          Taxon = replace(Taxon, Taxon == 'Hackberry_dist', 'Other.hardwood_dist'),
-         Taxon = replace(Taxon, Taxon == 'Mulberry_dist', 'Other.hardwood_dist'),
-         Taxon = replace(Taxon, Taxon == 'Black.gum_dist', 'Other.hardwood_dist'))
+         Taxon = replace(Taxon, Taxon == 'Mulberry_dist', 'Other.hardwood_dist'))
 
 # Let's visualize again
 longydata |>
@@ -138,38 +133,46 @@ new.ydata <- ydata |>
   select(-c(Poplar, Poplar.tulip.poplar, Tulip.poplar)) |>
   # Rename the new column
   rename(Poplar.tulip.poplar = TP) |>
+  # Do the same with "black gum/sweet gum"
+  mutate(BGSG = Black.gum.sweet.gum + Sweet.gum + Black.gum) |>
+  mutate(BGSG = if_else(BGSG > 1, 1, BGSG)) |>
+  select(-c(Black.gum.sweet.gum, Sweet.gum, Black.gum)) |>
+  rename(Black.gum.sweet.gum = BGSG) |>
   # Repeat with our category of "other conifers" defined above
   mutate(Other.conifer = Bald.cypress + Pine + Tamarack + Cedar.juniper) |>
   mutate(Other.conifer = if_else(Other.conifer > 1, 1, Other.conifer)) |>
   select(-c(Bald.cypress, Pine, Tamarack, Cedar.juniper)) |>
   # Repeat with our category of "other hardwoods" defined above
-  mutate(Other.hardwood.2 = Birch + Sweet.gum + Locust + Willow + Cherry +
-           Sycamore + Buckeye + Hackberry + Mulberry + Black.gum + Other.hardwood +
+  mutate(Other.hardwood.2 = Birch + Locust + Willow + Cherry +
+           Sycamore + Buckeye + Hackberry + Mulberry + Other.hardwood +
            Alder + Chestnut) |>
   mutate(Other.hardwood.2 = if_else(Other.hardwood.2 > 1, 1, Other.hardwood.2)) |>
-  select(-c(Birch, Sweet.gum, Locust, Willow, Cherry, Sycamore,
-            Buckeye, Hackberry, Mulberry, Black.gum, Other.hardwood,
+  select(-c(Birch, Locust, Willow, Cherry, Sycamore,
+            Buckeye, Hackberry, Mulberry, Other.hardwood,
             Alder, Chestnut)) |>
   rename(Other.hardwood = Other.hardwood.2)
 
 # Redo for effort
+## This is done in two steps because we have to use the rowwise function to take means
 new.edata <- effort |>
-  # Make distance = distance of any of these categories and their average if more
-  # than one tree from more than one category is present at a given corner
-  mutate(TP_dist = mean(c(Poplar_dist, Poplar.tulip.poplar_dist, Tulip.poplar_dist), na.rm = T)) |>
-  select(-c(Poplar_dist, Poplar.tulip.poplar_dist, Tulip.poplar_dist)) |>
-  rename(Poplar.tulip.poplar_dist = TP_dist) |>
-  # Repeat for "other conifer" category
-  mutate(Other.conifer_dist = mean(c(Bald.cypress_dist, Pine_dist, Tamarack_dist, Cedar.juniper_dist), na.rm = T)) |>
-  select(-c(Bald.cypress_dist, Pine_dist, Tamarack_dist, Cedar.juniper_dist)) |>
-  # Repeat for "other hardwood category
-  mutate(Other.hardwood.2_dist = mean(c(Birch_dist, Sweet.gum_dist, Locust_dist, Willow_dist, Cherry_dist,
-                                        Sycamore_dist, Buckeye_dist, Hackberry_dist, Mulberry_dist, Black.gum_dist, Other.hardwood_dist,
-                                        Alder_dist, Chestnut_dist), na.rm = T)) |>
-  select(-c(Birch_dist, Sweet.gum_dist, Locust_dist, Willow_dist, Cherry_dist, Sycamore_dist,
-            Buckeye_dist, Hackberry_dist, Mulberry_dist, Black.gum_dist, Other.hardwood_dist,
-            Alder_dist, Chestnut_dist)) |>
-  rename(Other.hardwood_dist = Other.hardwood.2_dist)
+  rowwise() |>
+  mutate(TP_dist = mean(c(Poplar_dist, Poplar.tulip.poplar_dist, Tulip.poplar_dist), na.rm = T),
+         BGSG_dist = mean(c(Black.gum.sweet.gum_dist, Black.gum_dist, Sweet.gum_dist), na.rm = T),
+         Other.conifer_dist = mean(c(Bald.cypress_dist, Pine_dist, Tamarack_dist, Cedar.juniper_dist), na.rm = T),
+         Other.hardwood.2_dist = mean(c(Birch_dist, Locust_dist, Willow_dist, Cherry_dist,
+                                        Sycamore_dist, Buckeye_dist, Hackberry_dist, Mulberry_dist, 
+                                        Alder_dist, Chestnut_dist), na.rm = T))
+
+new.edata <- new.edata |>
+  mutate_all(~ifelse(is.nan(.), NA, .)) |>
+  select(-c(Poplar_dist, Poplar.tulip.poplar_dist, Tulip.poplar_dist,
+            Black.gum.sweet.gum_dist, Black.gum_dist, Sweet.gum_dist,
+            Bald.cypress_dist, Pine_dist, Tamarack_dist, Cedar.juniper_dist,
+            Other.hardwood_dist, Birch_dist, Locust_dist, Willow_dist, Cherry_dist, Sycamore_dist,
+            Buckeye_dist, Hackberry_dist, Mulberry_dist, Alder_dist, Chestnut_dist)) |>
+  rename(Poplar.tulip.poplar_dist = TP_dist,
+         Black.gum.sweet.gum_dist = BGSG_dist,
+         Other.hardwood_dist = Other.hardwood.2_dist)
 
 # Now, we need to make sure that we didn't create any more rows with
 # only zeros
