@@ -94,7 +94,7 @@ for(i in 1:length(yfiles)){
   cols <- colnames(tempdata)
   save <- which(columns %nin% cols)
   newcols <- (ncol(tempdata)+1):(ncol(tempdata)+length(save))
-  tempdata[,newcols] <- 0
+  tempdata[,newcols] <- NA
   tempdata <- as.data.frame(tempdata)
   colnames(tempdata)[newcols] <- columns[save]
   edata_list[[i]] <- tempdata
@@ -399,7 +399,7 @@ dist <- dist %>%
          Chestnut_dist = ifelse(Chestnut_dist == -999, av_chestnut$mean, Chestnut_dist))
 
 # Replace 0s with 0.01 because of divide by zero for inverting
-dist[dist==0] <- 0.01
+dist[dist==0] <- 1
 
 # Make species-specific effort
 effort <- 1/dist

@@ -195,4 +195,4 @@ ydata <- new.ydata
 edata <- new.edata
 
 # I'm going to save this in a different object for now
-save(xdata, ydata, edata, file = 'GJAM DATA/process2.RData')
+save(xdata, ydata, edata, site_effort, file = 'GJAM DATA/process2.RData')
