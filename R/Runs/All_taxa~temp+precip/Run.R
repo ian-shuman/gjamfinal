@@ -5,8 +5,8 @@
 ## This script is currently set up to run on ND's CRC cluster
 
 rm(list = ls())
-require(tidyverse, lib.loc = '~/Rlibs2')
-require(gjam, lib.loc = '~/Rlibs2')
+require(tidyverse, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(gjam, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
 
 ## Change only these variables ##
 setwd('~/gjam-master/')

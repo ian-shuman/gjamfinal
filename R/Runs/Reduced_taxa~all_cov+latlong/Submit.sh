@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -M awillso2@nd.edu
+#$ -M ishuman2@nd.edu
 #$ -m abe
 #$ -pe smp 4
 #$ -q long
@@ -7,4 +7,4 @@
 
 module load R
 
-R CMD BATCH ~/gjam-master/R/Runs/Reduced_taxa-all_cov+latlong/Run.R output_reduced_taxa-all_cov_latlong.out
+R CMD BATCH ~/gjam-master/R/Runs/Reduced_taxa~all_cov+latlong/Run.R output_reduced_taxa-all_cov_latlong.out
