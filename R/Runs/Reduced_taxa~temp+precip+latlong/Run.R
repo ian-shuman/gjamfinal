@@ -82,7 +82,8 @@ form1 = as.formula(~ totalPPT + MeanTEMP + lat + long)
 
 # Prepare & run model
 mlist = list(ng = niter, burnin = nburn, typeNames = 'PA',
-             effort = elist, random = 'marea')
+             effort = elist, random = 'marea',
+             PREDICTX = F)
 
 out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
 

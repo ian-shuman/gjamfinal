@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M ishuman2@nd.edu
 #$ -m abe
-#$ -pe smp 4
+#$ -pe smp 10
 #$ -q long
 #$ -N reduced_taxa-temp_precip
 
