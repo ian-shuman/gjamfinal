@@ -5,14 +5,25 @@
 ## This script is currently set up to run on ND's CRC cluster
 
 rm(list = ls())
+if(!require(parallel, lib.loc = '/afs/crc.nd.edu/user/a/awillso2/Rlibs2')) install.packags('parallel', lib = '/afs/crc.nd.edu/user/a/awillso2/Rlibs2', repos = 'http://cran.r-project.org', depenencies = T)
+if(!require(snow, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')) install.packages('snow', lib = '/afs/crc.nd.edu/user/a/awillso2/Rlibs2', repos = 'http://cran.r-project.org', dependencies = T)
+require(snow, lib.loc = '/afs/crc.nd.edu/user/a/awillso2/Rlibs2')
+require(parallel, lib.loc = '/afs/crc.nd.edu/user/a/awillso2/Rlibs2')
+require(snow, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(parallel, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(crayon, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(withr, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(tzdb, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(backports, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+require(broom, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
 require(tidyverse, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
 require(gjam, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
 
 ## Change only these variables ##
 setwd('~/gjam-master/')
 effort_type <- 'full' # 'site' or 'full'
-niter <- 10
-nburn <- 5
+niter <- 750
+nburn <- 200
 
 ## End changes ##
 
@@ -85,7 +96,14 @@ mlist = list(ng = niter, burnin = nburn, typeNames = 'PA',
              effort = elist, random = 'marea',
              PREDICTX = F)
 
-out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
+cl <- makeCluster(3, "SOCK")
+clusterEvalQ(cl, library(gjam))
+##Send data to workers, then fit models. One disadvantage of this
+##parallelization is that you lose the ability to watch the progress bar.
+clusterExport(cl, list("form1","xdata","ydata","mlist"))
+out = clusterApply(cl, 1:3,gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist))
+
+#out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
 
 # Save
 save.image(file = 'out/reduced_taxa-all_cov.RData')
