@@ -4,11 +4,13 @@ library(tidyverse)
 library(corrplot)
 library(cowplot)
 
-#load('out/reduced_taxa-all_cov+latlong.RData')
-load('out/reduced_taxa-temp+precip_1.RData')
+load('out/all_taxa-all_cov_latlong.RData')
 out1 <- out
-load('out/reduced_taxa-temp+precip_2.RData')
-out2 <- out
+#load('out/reduced_taxa-all_cov+latlong.RData')
+#load('out/reduced_taxa-temp+precip_1.RData')
+#out1 <- out
+#load('out/reduced_taxa-temp+precip_2.RData')
+#out2 <- out
 
 ### Trace plots
 
