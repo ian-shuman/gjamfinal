@@ -57,7 +57,7 @@ test <- longydata |>
 print(test, n = nrow(test))
 
 # Now let's plot the number of observations of each taxon
-longydata |>
+p1 <- longydata |>
   group_by(Taxon) |>
   mutate(Taxon = replace(Taxon, Taxon == 'No.tree', 'No tree'),
          Taxon = replace(Taxon, Taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar'),
@@ -113,12 +113,14 @@ longeffort <- longeffort |>
          Taxon = replace(Taxon, Taxon == 'Mulberry_dist', 'Other.hardwood_dist'))
 
 # Let's visualize again
-longydata |>
+p2 <- longydata |>
   group_by(Taxon) |>
   summarize(count = length(which(PA == 1))) |>
   ggplot(aes(x = reorder(Taxon, count), y = count)) +
   geom_point() +
-  coord_flip()
+  coord_flip() +
+  theme_minimal() +
+  ylab('Number of Observations') + xlab('')
 
 ## This seems a lot more reasonable now. Let's insert this information
 ## back into our original "ydata" data object
@@ -151,6 +153,21 @@ new.ydata <- ydata |>
             Buckeye, Hackberry, Mulberry, Other.hardwood,
             Alder, Chestnut)) |>
   rename(Other.hardwood = Other.hardwood.2)
+
+p3 <- new.ydata |>
+  pivot_longer(No.tree:Other.hardwood, names_to = 'taxon', values_to = 'PA') |>
+  mutate(taxon = if_else(taxon == 'No.tree', 'No Tree', taxon),
+         taxon = if_else(taxon == 'Other.hardwood', 'Other Hardwood', taxon),
+         taxon = if_else(taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum', taxon),
+         taxon = if_else(taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar', taxon),
+         taxon = if_else(taxon == 'Other.conifer', 'Other Conifer', taxon)) |>
+  group_by(taxon) |>
+  summarize(count = length(which(PA == 1))) |>
+  ggplot(aes(x = reorder(taxon, count), y =count)) +
+  geom_point() +
+  coord_flip() +
+  theme_minimal() +
+  xlab('') + ylab('Number of Observations')
 
 # Redo for effort
 ## This is done in two steps because we have to use the rowwise function to take means
