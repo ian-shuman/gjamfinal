@@ -4,154 +4,176 @@ library(tidyverse)
 library(corrplot)
 library(cowplot)
 
-load('out/all_taxa-all_cov_latlong.RData')
-out1 <- out
-#load('out/reduced_taxa-all_cov+latlong.RData')
-#load('out/reduced_taxa-temp+precip_1.RData')
-#out1 <- out
-#load('out/reduced_taxa-temp+precip_2.RData')
-#out2 <- out
-
-### Trace plots
-
-## Quantities in "chains" portion of output
-## bFacGibbs: standardized beta means (betaStandXmu)
-## bgibbs: beta means (betaMu)
-## bgibbsUn: (betaMuUn)
-## fSensGibbs: sensitivity (fMu)
-## sgibbs: covariance (sigMu)
-
-bFacGibbs <- out1$chains$bFacGibbs
-bFacGibbs <- as.data.frame(bFacGibbs)
-bFacGibbs$chain <- rep(1, times = nrow(bFacGibbs))
-bFacGibbs$iter <- rownames(bFacGibbs)
-bFacGibbs2 <- out2$chains$bFacGibbs
-bFacGibbs2 <- as.data.frame(bFacGibbs2)
-bFacGibbs2$chain <- rep(2, times = nrow(bFacGibbs2))
-bFacGibbs2$iter <- rownames(bFacGibbs2)
-bFacGibbs <- rbind(bFacGibbs, bFacGibbs2)
-
-bgibbs <- out1$chains$bgibbs
-bgibbs <- as.data.frame(bgibbs)
-bgibbs$chain <- rep(1, times = nrow(bgibbs))
-bgibbs$iter <- rownames(bgibbs)
-bgibbs2 <- out2$chains$bgibbs
-bgibbs2 <- as.data.frame(bgibbs2)
-bgibbs2$chain <- rep(2, times = nrow(bgibbs2))
-bgibbs2$iter <- rownames(bgibbs2)
-bgibbs <- rbind(bgibbs, bgibbs2)
-
-bgibbsUn <- out1$chains$bgibbsUn
-bgibbsUn <- as.data.frame(bgibbsUn)
-bgibbsUn$chain <- rep(1, times = nrow(bgibbsUn))
-bgibbsUn$iter <- rownames(bgibbsUn)
-bgibbsUn2 <- out2$chains$bgibbsUn
-bgibbsUn2 <- as.data.frame(bgibbsUn2)
-bgibbsUn2$chain <- rep(2, times = nrow(bgibbsUn2))
-bgibbsUn2$iter <- rownames(bgibbsUn2)
-bgibbsUn <- rbind(bgibbsUn, bgibbsUn2)
-
-fSensGibbs <- out1$chains$fSensGibbs
-fSensGibbs <- as.data.frame(fSensGibbs)
-fSensGibbs$chain <- rep(1, times = nrow(fSensGibbs))
-fSensGibbs$iter <- rownames(fSensGibbs)
-fSensGibbs2 <- out2$chains$fSensGibbs
-fSensGibbs2 <- as.data.frame(fSensGibbs2)
-fSensGibbs2$chain <- rep(2, times = nrow(fSensGibbs2))
-fSensGibbs2$iter <- rownames(fSensGibbs2)
-fSensGibbs <- rbind(fSensGibbs, fSensGibbs2)
-
-sgibbs <- out1$chains$sgibbs
-sgibbs <- as.data.frame(sgibbs)
-sgibbs$chain <- rep(1, times = nrow(sgibbs))
-sgibbs$iter <- rownames(sgibbs)
-sgibbs2 <- out2$chains$sgibbs
-sgibbs2 <- as.data.frame(sgibbs2)
-sgibbs2$chain <- rep(2, times = nrow(sgibbs2))
-sgibbs2$iter <- rownames(sgibbs2)
-sgibbs <- rbind(sgibbs, sgibbs2)
-
-bFacGibbs |>
-  pivot_longer(cols = No.tree_mean.SlopeProjected:Other.hardwood_FloodplainYes, names_to = 'beta', values_to = 'estimate') |>
-  mutate(taxon = sub('_.*', '', beta),
-         variable = sub('.*_', '', beta)) |>
-  mutate(iter = as.numeric(iter)) |>
-  filter(iter > 200) |>
-  ggplot(aes(x = iter, y = estimate, color = taxon)) +
-  geom_line() +
-  facet_wrap(~variable, scales = 'free')
-
-bgibbs |>
-  pivot_longer(cols = No.tree_mean.SlopeProjected:Other.hardwood_FloodplainYes, names_to = 'beta', values_to = 'estimate') |>
-  mutate(taxon = sub('_.*', '', beta),
-         variable = sub('.*_', '', beta)) |>
-  mutate(iter = as.numeric(iter)) |>
-  filter(iter > 200) |>
-  ggplot(aes(x = iter, y = estimate, color = taxon)) +
-  geom_line() +
-  facet_wrap(~variable, scales = 'free')
-
-bgibbsUn |>
-  pivot_longer(cols = No.tree_mean.SlopeProjected:Other.hardwood_FloodplainYes, names_to = 'beta', values_to = 'estimate') |>
-  mutate(taxon = sub('_.*', '', beta),
-         variable = sub('.*_', '', beta)) |>
-  mutate(iter = as.numeric(iter)) |>
-  filter(iter > 200) |>
-  ggplot(aes(x = iter, y = estimate, color = taxon)) +
-  geom_line() +
-  facet_wrap(~variable, scales = 'free')
-
-fSensGibbs |>
-  pivot_longer(cols = mean.SlopeProjected:FloodplainYes, names_to = 'F', values_to = 'estimate') |>
-  mutate(iter = as.numeric(iter)) |>
-  filter(iter > 200) |>
-  ggplot(aes(x = iter, y = estimate)) +
-  geom_line() +
-  facet_wrap(~F, scales = 'free')
-
-ints = sample(colnames(sgibbs), 5, replace = F)
-
-sgibbs |>
-  pivot_longer(cols = No.tree_No.tree:Other.hardwood_Other.hardwood, names_to = 'sigma', values_to = 'estimate') |>
-  mutate(iter = as.numeric(iter)) |>
-  filter(iter > 200) |>
-  filter(sigma %in% c(ints, iter)) |> 
-  ggplot(aes(x = iter, y = estimate)) +
-  geom_line() +
-  facet_wrap(~sigma, scales = 'free')
+# Load data for given model
+# Should load the "combined.RData" file in the
+# subfolder of the "out" directory corresponding to the
+# model of interest
+load('out/all_taxa-all_cov/combined.RData')
 
 ## Correlations between taxa and drivers
-bFacGibbs_corr <- bFacGibbs[201:1000,1:240]
+
+# Number of columns we're working with
+cols <- ncol(bFacGibbs)
+
+# Remove unnecessary columns and generate summary statistics
+bFacGibbs_corr <- bFacGibbs |>
+  select(-c(chain, iter))
 corr_mean <- apply(bFacGibbs_corr, 2, mean, na.rm = T)
 corr_sd <- apply(bFacGibbs_corr, 2, sd, na.rm = T)
 corr_lower <- apply(bFacGibbs_corr, 2, quantile, probs = 0.025, na.rm = T)
 corr_upper <- apply(bFacGibbs_corr, 2, quantile, probs = 0.975, na.rm = T)
 
+# Formatting our summary statistics
 corr <- rbind(corr_mean, corr_sd, corr_lower, corr_upper)
 rownames(corr) <- c('mean', 'sd', 'lower', 'upper')
-
 corr <- t(corr)
-
 corr <- as.data.frame(corr)
-
 corr <- corr |>
   rownames_to_column(var = 'beta') |>
   mutate(taxon = sub('_.*', '', beta),
          covariate = sub('.*_', '', beta))
 
+# Specify color palette
+pal <- c('#bb5566',
+         '#ddaa34', '#ecd08f',
+         '#002a53', '#004488', '#4c7cac', '#8aa9c8', '#c2d2e2', '#dee7f0',
+         '#005f5f', '#008b8b', '#38a5a5', '#63b9b9', '#8ecdcd', '#c1e4e4')
+# Plot with free y axis
 corr |>
+  mutate(covariate = replace(covariate, covariate == 'mean.SlopeProjected', 'Slope'),
+         covariate = replace(covariate, covariate == 'mean.AspectProjected', 'Aspect'),
+         covariate = replace(covariate, covariate == 'mean.CAC', '[CaCO3]'),
+         covariate = replace(covariate, covariate == 'mean.CEC', 'Cation Exchange\nCapacity'),
+         covariate = replace(covariate, covariate == 'mean.CLA', 'Soil %Clay'),
+         covariate = replace(covariate, covariate == 'mean.SAN', 'Soil %Sand'),
+         covariate = replace(covariate, covariate == 'mean.WAT', 'Available Water\nContent'),
+         covariate = replace(covariate, covariate == 'mean.SWI', 'Saga Wetness Index'),
+         covariate = replace(covariate, covariate == 'totalPPT', 'Precipitation'),
+         covariate = replace(covariate, covariate == 'MeanTEMP', 'Temperature'),
+         covariate = replace(covariate, covariate == 'HydricYes', 'Hydric Soil'),
+         covariate = replace(covariate, covariate == 'FloodplainYes', 'Floodplain')) |>
+  filter(covariate != 'FloodplainNo') |>
+  filter(covariate != 'HydricNo') |>
+  mutate(taxon = replace(taxon, taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum'),
+         taxon = replace(taxon, taxon == 'No.tree', 'No Tree'),
+         taxon = replace(taxon, taxon == 'Other.conifer', 'Other Conifer'),
+         taxon = replace(taxon, taxon == 'Other.hardwood', 'Other Hardwood'),
+         taxon = replace(taxon, taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar')) |>
+  rename(Taxon = taxon) |>
   ggplot() +
-  geom_boxplot(aes(x = taxon, ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, color = taxon), stat = 'identity') +
-  facet_wrap(~covariate, scales = 'free_y')
+  geom_boxplot(aes(x = Taxon, ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, color = Taxon), stat = 'identity') +
+  geom_hline(aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
+  facet_wrap(~covariate, scales = 'free_y') +
+  xlab('') + ylab('Estimate') +
+  scale_x_discrete(limits = c('No Tree',
+                              'Hickory', 'Oak',
+                              'Ash', 'Basswood', 'Beech', 'Black Gum/Sweet Gum',
+                              'Dogwood', 'Elm', 'Ironwood', 'Maple', 'Other Conifer',
+                              'Other Hardwood', 'Poplar/Tulip Poplar', 'Walnut')) +
+  scale_color_manual(limits = c('No Tree',
+                                  'Hickory', 'Oak',
+                                  'Ash', 'Basswood', 'Beech', 'Black Gum/Sweet Gum',
+                                  'Dogwood', 'Elm', 'Ironwood', 'Maple', 'Other Conifer',
+                                  'Other Hardwood', 'Poplar/Tulip Poplar', 'Walnut'), values = pal) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+
+# Plot with fixed y axis
+corr |>
+  mutate(covariate = replace(covariate, covariate == 'mean.SlopeProjected', 'Slope'),
+         covariate = replace(covariate, covariate == 'mean.AspectProjected', 'Aspect'),
+         covariate = replace(covariate, covariate == 'mean.CAC', '[CaCO3]'),
+         covariate = replace(covariate, covariate == 'mean.CEC', 'Cation Exchange\nCapacity'),
+         covariate = replace(covariate, covariate == 'mean.CLA', 'Soil %Clay'),
+         covariate = replace(covariate, covariate == 'mean.SAN', 'Soil %Sand'),
+         covariate = replace(covariate, covariate == 'mean.WAT', 'Available Water\nContent'),
+         covariate = replace(covariate, covariate == 'mean.SWI', 'Saga Wetness Index'),
+         covariate = replace(covariate, covariate == 'totalPPT', 'Precipitation'),
+         covariate = replace(covariate, covariate == 'MeanTEMP', 'Temperature'),
+         covariate = replace(covariate, covariate == 'HydricYes', 'Hydric Soil'),
+         covariate = replace(covariate, covariate == 'FloodplainYes', 'Floodplain')) |>
+  filter(covariate != 'FloodplainNo') |>
+  filter(covariate != 'HydricNo') |>
+  mutate(taxon = replace(taxon, taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum'),
+         taxon = replace(taxon, taxon == 'No.tree', 'No Tree'),
+         taxon = replace(taxon, taxon == 'Other.conifer', 'Other Conifer'),
+         taxon = replace(taxon, taxon == 'Other.hardwood', 'Other Hardwood'),
+         taxon = replace(taxon, taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar')) |>
+  rename(Taxon = taxon) |>
+  ggplot() +
+  geom_boxplot(aes(x = Taxon, ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, color = Taxon), stat = 'identity') +
+  geom_hline(aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
+  facet_wrap(~covariate) +
+  xlab('') + ylab('Estimate') +
+  scale_x_discrete(limits = c('No Tree',
+                              'Hickory', 'Oak',
+                              'Ash', 'Basswood', 'Beech', 'Black Gum/Sweet Gum',
+                              'Dogwood', 'Elm', 'Ironwood', 'Maple', 'Other Conifer',
+                              'Other Hardwood', 'Poplar/Tulip Poplar', 'Walnut')) +
+  scale_color_manual(limits = c('No Tree',
+                                  'Hickory', 'Oak',
+                                  'Ash', 'Basswood', 'Beech', 'Black Gum/Sweet Gum',
+                                  'Dogwood', 'Elm', 'Ironwood', 'Maple', 'Other Conifer',
+                                  'Other Hardwood', 'Poplar/Tulip Poplar', 'Walnut'), values = pal) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+
+# Do some cleaning of the sensitivity (fSensGibbs)
+fSensGibbs_sum <- fSensGibbs |>
+  select(-c(chain, iter))
+sens_mean <- apply(fSensGibbs_sum, 2, mean, na.rm = T)
+sens_sd <- apply(fSensGibbs_sum, 2, sd, na.rm = T)
+sens_lower <- apply(fSensGibbs_sum, 2, quantile, probs = 0.025, na.rm = T)
+sens_upper <- apply(fSensGibbs_sum, 2, quantile, probs = 0.975, na.rm = T)
+
+sens <- rbind(sens_mean, sens_sd, sens_lower, sens_upper)
+rownames(sens) <- c('mean', 'sd', 'lower', 'upper')
+sens <- t(sens)
+sens <- as.data.frame(sens)
+sens <- sens |>
+  rownames_to_column(var = 'covar')
+
+# Plot sensitivity
+sens |>
+  mutate(covar = replace(covar, covar == 'mean.SlopeProjected', 'Slope'),
+         covar = replace(covar, covar == 'mean.AspectProjected', 'Aspect'),
+         covar = replace(covar, covar == 'mean.CAC', '[CaCO3]'),
+         covar = replace(covar, covar == 'mean.CEC', 'Cation Exchange\nCapacity'),
+         covar = replace(covar, covar == 'mean.CLA', 'Soil %Clay'),
+         covar = replace(covar, covar == 'mean.SAN', 'Soil %Sand'),
+         covar = replace(covar, covar == 'mean.WAT', 'Available Water\nContent'),
+         covar = replace(covar, covar == 'mean.SWI', 'Saga Wetness Index'),
+         covar = replace(covar, covar == 'totalPPT', 'Precipitation'),
+         covar = replace(covar, covar == 'MeanTEMP', 'Temperature'),
+         covar = replace(covar, covar == 'HydricYes', 'Hydric Soil'),
+         covar = replace(covar, covar == 'FloodplainYes', 'Floodplain')) |>
+  filter(covar != 'HydricNo') |>
+  filter(covar != 'FloodplainNo') |>
+  ggplot() +
+  geom_boxplot(aes(x = reorder(covar, mean, decreasing = F), 
+                   ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, 
+                   color = reorder(covar, mean, decreasing = T)), stat = 'identity') +
+  coord_flip() +
+  xlab('') + ylab(expression(paste('Sensitivity (', hat(F) ,')'))) +
+  theme_minimal() +
+  scale_color_manual(values = c('#88ccee', '#88ccee',
+                                '#aa4499', '#aa4499', '#aa4499', '#aa4499',
+                                '#aa4499', '#aa4499', '#aa4499',
+                                '#999932', '#999932', '#999932'), name = '')
 
 ## Correlations between taxa
 
-sgibbs_corr <- sgibbs[201:1000, 1:120]
-mean_sgibbs <- apply(sgibbs_corr, 2, mean)
-sd_sgibbs <- apply(sgibbs_corr, 2, sd)
-lower_sgibbs <- apply(sgibbs_corr, 2, quantile, probs = 0.025)
-upper_sgibbs <- apply(sgibbs_corr, 2, quantile, probs = 0.975)
+# Remove unnecessary columns
+sgibbs_cor <- sgibbs |>
+  select(-c(chain, iter))
+# Get summary statistics
+mean_sgibbs <- apply(sgibbs_cor, 2, mean)
+sd_sgibbs <- apply(sgibbs_cor, 2, sd)
+lower_sgibbs <- apply(sgibbs_cor, 2, quantile, probs = 0.025)
+upper_sgibbs <- apply(sgibbs_cor, 2, quantile, probs = 0.975)
 
+# Need to put into the matrix format
+# This gives the index for each entry of the matrix
 ind <- rbind(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
              c(2, 16, 17, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29),
              c(3, 17, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42),
@@ -168,8 +190,17 @@ ind <- rbind(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
              c(14, 28, 41, 53, 64, 74, 83, 91, 98, 104, 109, 113, 116, 118, 119),
              c(15, 29, 42, 54, 65, 75, 84, 92, 99, 105, 110, 114, 117, 119, 120))
 
+# Now we format the output into a matrix
 corr_mat <- mean_sgibbs[ind]
 corr_mat <- matrix(corr_mat, nrow = 15, ncol = 15)
 corr_mat <- cov2cor(corr_mat)
 colnames(corr_mat) <- rownames(corr_mat) <- c('No Tree', 'Oak', 'Elm', 'Hickory', 'Ash', 'Maple', 'Basswood', 'Walnut', 'Ironwood', 'Beech', 'Dogwood', 'Poplar/Tulip Poplar', 'Black Gum/Sweet Gum', 'Other Conifer', 'Other Hardwood')
-corrplot(corr_mat, diag = T)
+
+# Remove diagonals to improve visualization
+corr_mat[corr_mat == 1] <- NA
+
+# Plot
+corrplot(corr_mat, diag = T, type = 'upper', method = 'color', 
+         tl.col = 'black', col = brewer.pal(n = 11, name = 'PRGn'))
+
+         
