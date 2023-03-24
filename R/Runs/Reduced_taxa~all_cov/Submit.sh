@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -M ishuman2@nd.edu
+#$ -M awillso2@nd.edu
 #$ -m abe
 #$ -pe smp 10
 #$ -q long

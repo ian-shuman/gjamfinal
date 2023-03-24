@@ -22,7 +22,7 @@ require(gjam, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
 ## Change only these variables ##
 setwd('~/gjam-master/')
 effort_type <- 'full' # 'site' or 'full'
-niter <- 750
+niter <- 1000
 nburn <- 200
 
 ## End changes ##
@@ -96,14 +96,14 @@ mlist = list(ng = niter, burnin = nburn, typeNames = 'PA',
              effort = elist, random = 'marea',
              PREDICTX = F)
 
-cl <- makeCluster(3, "SOCK")
-clusterEvalQ(cl, library(gjam))
+#cl <- makeCluster(3, "SOCK")
+#clusterEvalQ(cl, library(gjam))
 ##Send data to workers, then fit models. One disadvantage of this
 ##parallelization is that you lose the ability to watch the progress bar.
-clusterExport(cl, list("form1","xdata","ydata","mlist"))
-out = clusterApply(cl, 1:3,gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist))
+#clusterExport(cl, list("form1","xdata","ydata","mlist"))
+#out = clusterApply(cl, 1:3,gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist))
 
-#out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
+out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
 
 # Save
 save.image(file = 'out/reduced_taxa-all_cov.RData')
