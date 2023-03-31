@@ -161,10 +161,10 @@ comp_otherconifer <- comp |>
 comp_otherhardwood <- comp |>
   filter(Taxon == 'Other.hardwood')
 
-form_notree <- glm(Observed ~ Probability, family = binomial, data = comp_notree)
+form_notree <- glm(Observed ~ Predicted, family = binomial, data = comp_notree)
 with(summary(form_notree), 1 - deviance/null.deviance)
 
-form_oak <- glm(Observed~Probability, family = binomial, data = comp_oak)
+form_oak <- glm(Observed~Predicted, family = binomial, data = comp_oak)
 with(summary(form_oak), 1 - deviance/null.deviance)
 
 form_elm <- glm(Observed ~ Probability, family = binomial, data = comp_elm)
