@@ -13,8 +13,9 @@ library(tidyverse)
   # all_taxa-temp+precip+latlong
   # reduced_taxa-all_cov+latlong
   # reduced_taxa-temp+precip
+  # reduced_taxa-all_cov
 
-type <- 'reduced_taxa-temp+precip'
+type <- 'reduced_taxa-all_cov'
 
 # List all the outputs we have for that model
 files <- list.files(path = paste0('out/', type))
