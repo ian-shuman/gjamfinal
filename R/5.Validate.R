@@ -10,10 +10,11 @@ library(lme4)
 library(piecewiseSEM)
 
 # Load output from GJAM
-load('out/all_taxa-all_cov/all_taxa-all_cov_1.RData')
+load('out/reduced_taxa-all_cov/reduced_taxa-all_cov_1.RData')
+#load('out/all_taxa-all_cov/all_taxa-all_cov_1.RData')
 
 # Check to make sure convergence looks okay since we only have 1 chain
-gjamPlot(out)
+#gjamPlot(out)
 
 # Looks good
 
@@ -21,7 +22,8 @@ gjamPlot(out)
 rm(edata, elist, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-load('GJAM DATA/Withheld For Validation/validation_process2.RData')
+load('GJAM DATA/Withheld For Validation/validation_process_reduce.RData')
+#load('GJAM DATA/Withheld For Validation/validation_process2.RData')
 
 # Where there are NA's in the aspect covariate, make it a random value
 # within the range of the data
