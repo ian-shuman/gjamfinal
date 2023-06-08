@@ -17,8 +17,8 @@ nburn <- 5
 ## End changes ##
 
 # Load data from 1.5.Reduce.R
-load('GJAM DATA/process2.RData')
-load('GJAM DATA/effort.RData')
+load('GJAMDATA/process2_fixed.RData')
+load('GJAMDATA/effort_fixed.RData')
 
 # Reformat effort
 if(effort_type == 'site'){edata <- site_effort}
@@ -31,7 +31,7 @@ elist = list(columns = 1:ncol(ydata),
 # Define formula
 # Presence/absence at each site is a function of each of the environmental covariates
 # with no interactions
-form1 = as.formula(~ mean.SlopeProjected + mean.AspectProjected + mean.CAC +
+form1 = as.formula(~ mean.SlopeProjected + direction + mean.CAC +
                      mean.CEC + mean.CLA + mean.SAN + mean.WAT + mean.SWI + 
                      Hydric + Floodplain + totalPPT + MeanTEMP)
 
@@ -42,7 +42,7 @@ form1 = as.formula(~ mean.SlopeProjected + mean.AspectProjected + mean.CAC +
 
 # Prepare & run model
 mlist = list(ng = niter, burnin = nburn, typeNames = 'PA',
-             effort = elist, random = c('marea', 'long', 'lat'))
+             effort = elist, random = c('marea'))
 
 out = gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
 

@@ -9,8 +9,8 @@ rm(list = ls())
 library(tidyverse)
 library(corrplot)
 
-load('GJAM DATA/process.RData')
-load('GJAM DATA/effort.RData')
+load('GJAMDATA/process_fixed.RData')
+load('GJAMDATA/effort_fixed.RData')
 
 # Make into a more usable format
 longydata <- ydata |>
@@ -215,4 +215,4 @@ ydata <- new.ydata
 edata <- new.edata
 
 # I'm going to save this in a different object for now
-save(xdata, ydata, edata, site_effort, file = 'GJAM DATA/process2.RData')
+save(xdata, ydata, edata, site_effort, file = 'GJAMDATA/process2_fixed.RData')
