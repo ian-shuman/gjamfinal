@@ -1,3 +1,7 @@
+## Figures associated with Shuman et al. publication in prep
+
+## Author: AM Willson
+
 rm(list = ls())
 
 library(tidyverse)
@@ -9,7 +13,7 @@ library(RColorBrewer)
 # Should load the "combined.RData" file in the
 # subfolder of the "out" directory corresponding to the
 # model of interest
-load('out/all_taxa-all_cov/combined.RData')
+load('out/FINAL_RUNS/All_taxa~all_cov_NOASPECT/combined.RData')
 
 ## Correlations between taxa and drivers
 
@@ -39,6 +43,7 @@ pal <- c('#bb5566',
          '#ddaa34', '#ecd08f',
          '#002a53', '#004488', '#4c7cac', '#8aa9c8', '#c2d2e2', '#dee7f0',
          '#005f5f', '#008b8b', '#38a5a5', '#63b9b9', '#8ecdcd', '#c1e4e4')
+
 # Plot with free y axis
 corr |>
   mutate(covariate = replace(covariate, covariate == 'mean.SlopeProjected', 'Slope'),
@@ -136,31 +141,40 @@ sens <- sens |>
 
 # Plot sensitivity
 sens |>
-  mutate(covar = replace(covar, covar == 'mean.SlopeProjected', 'Slope'),
-         covar = replace(covar, covar == 'mean.AspectProjected', 'Aspect'),
-         covar = replace(covar, covar == 'mean.CAC', '[CaCO3]'),
-         covar = replace(covar, covar == 'mean.CEC', 'Cation Exchange\nCapacity'),
-         covar = replace(covar, covar == 'mean.CLA', 'Soil %Clay'),
-         covar = replace(covar, covar == 'mean.SAN', 'Soil %Sand'),
-         covar = replace(covar, covar == 'mean.WAT', 'Available Water\nContent'),
+  mutate(covar = replace(covar, covar == 'CAC', 'CaCO3'),
+         covar = replace(covar, covar == 'CEC', 'Cation Exchange\nCapacity'),
+         covar = replace(covar, covar == 'CLA', 'Soil %Clay'),
+         covar = replace(covar, covar == 'SAN', 'Soil %Sand'),
+         covar = replace(covar, covar == 'WAT', 'Available Water\nContent'),
          covar = replace(covar, covar == 'mean.SWI', 'Saga Wetness Index'),
          covar = replace(covar, covar == 'totalPPT', 'Precipitation'),
          covar = replace(covar, covar == 'MeanTEMP', 'Temperature'),
          covar = replace(covar, covar == 'HydricYes', 'Hydric Soil'),
-         covar = replace(covar, covar == 'FloodplainYes', 'Floodplain')) |>
+         covar = replace(covar, covar == 'FloodplainYes', 'Floodplain'),
+         covar = replace(covar, covar == 'directionE', 'East-Facing Slope'),
+         covar = replace(covar, covar == 'directionN', 'North-Facing Slope'),
+         covar = replace(covar, covar == 'directionS', 'South-Facing Slope'),
+         covar = replace(covar, covar == 'directionW', 'West-Facing Slope')) |>
   filter(covar != 'HydricNo') |>
   filter(covar != 'FloodplainNo') |>
+  filter(covar != 'directionNS') |>
   ggplot() +
   geom_boxplot(aes(x = reorder(covar, mean, decreasing = F), 
                    ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, 
-                   color = reorder(covar, mean, decreasing = T)), stat = 'identity') +
+                   color = reorder(covar, mean, decreasing = T)), stat = 'identity', show.legend = F) +
   coord_flip() +
   xlab('') + ylab(expression(paste('Sensitivity (', hat(F) ,')'))) +
   theme_minimal() +
   scale_color_manual(values = c('#88ccee', '#88ccee',
-                                '#aa4499', '#aa4499', '#aa4499', '#aa4499',
-                                '#aa4499', '#aa4499', '#aa4499',
-                                '#999932', '#999932', '#999932'), name = '')
+                                '#999932', '#999932',
+                                #'#aa4499',
+                                '#999932',
+                                #'#aa4499', '#aa4499',
+                                '#999932',
+                                #'#aa4499',
+                                '#999932',
+                                '#aa4499', '#aa4499', '#aa4499', '#aa4499'), name = '')
+
 
 ## Correlations between taxa
 
@@ -200,9 +214,12 @@ colnames(corr_mat) <- rownames(corr_mat) <- c('No Tree', 'Oak', 'Elm', 'Hickory'
 # Remove diagonals to improve visualization
 corr_mat[corr_mat == 1] <- NA
 
+# Specify color palette
+pal <- c('#364b9a', '#4a7bb7', '#6ea6cd', '#93cae1', '#cde4ef', 
+         '#eaeccc', '#feda8b', '#fdb336', '#f67e4b', '#dd3d2d', '#a50026')
 # Plot
-corrplot(corr_mat, diag = T, type = 'upper', method = 'color', 
-         tl.col = 'black', col = brewer.pal(n = 11, name = 'PRGn'))
+corrplot(corr_mat, diag = F, type = 'upper', method = 'color', 
+         tl.col = 'black', col = rev(pal))
 
 # With upper and lower credible intervals
 low_mat <- lower_sgibbs[ind]
@@ -215,4 +232,5 @@ upp_mat <- matrix(upp_mat, nrow = 15, ncol = 15)
 upp_mat <- cov2cor(upp_mat)
 colnames(upp_mat) <- rownames(upp_mat) <- c('No Tree', 'Oak', 'Elm', 'Hickory', 'Ash', 'Maple', 'Basswood', 'Walnut', 'Ironwood', 'Beech', 'Dogwood', 'Poplar/Tulip Poplar', 'Black Gum/Sweet Gum', 'Other Conifer', 'Other Hardwood')
 
-corrplot(corr_mat, lowCI.mat = low_mat, uppCI.mat = upp_mat, plotCI = 'rect')
+corrplot(corr_mat, lowCI.mat = low_mat, uppCI.mat = upp_mat, plotCI = 'rect',
+         diag = F, type = 'upper', col = rev(pal), tl.col = 'black')
