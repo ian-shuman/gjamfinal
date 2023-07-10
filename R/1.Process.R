@@ -13,7 +13,7 @@ library(tidyverse)
 ## and ensuring all columns are present in all matrices in ydata and edata
 
 # Read in file names that we need to loop over
-xfiles <- list.files('GJAMDATA/X/Fixed/')
+xfiles <- list.files('GJAMDATA/X/New Soils Data/Aspect/')
 yfiles <- list.files('GJAMDATA/Y/')
 
 # Storage
@@ -23,7 +23,7 @@ yedata_list <- list()
 # Read in files
 for(i in 1:length(xfiles)){
   filename <- xfiles[i]
-  pathname <- paste0('GJAMDATA/X/Fixed/',filename)
+  pathname <- paste0('GJAMDATA/X/New Soils Data/Aspect/',filename)
   xdata_list[[i]] <- read.csv(pathname)
   
   filename <- yfiles[i]
@@ -125,19 +125,19 @@ for(i in 2:length(yfiles)){
 rm(edata_list, xdata_list, ydata_list, yedata_list)
 
 # Format management area columns
-xdata <- xdata %>%
-  mutate(marea = sub('_X.*', '', filename)) %>%
-  select(-c(filename, x, y)) %>%
+xdata <- xdata |>
+  mutate(marea = sub('_X.*', '', filename)) |>
+  dplyr::select(-c(filename, x, y)) |>
   mutate(uniqueID = paste0(marea,'_',uniqueID))
 
-ydata <- ydata %>%
-  mutate(marea = sub('_Y.*', '', filename)) %>%
-  select(-filename) %>%
+ydata <- ydata |>
+  mutate(marea = sub('_Y.*', '', filename)) |>
+  select(-filename) |>
   mutate(uniqueID = paste0(marea,'_',uniqueID))
 
-edata <- edata %>%
-  mutate(marea = sub('_Y.*', '', filename)) %>%
-  select(-filename) %>%
+edata <- edata |>
+  mutate(marea = sub('_Y.*', '', filename)) |>
+  select(-filename) |>
   mutate(uniqueID = ydata$uniqueID)
 
 #### STEP 2 ####
@@ -146,20 +146,20 @@ edata <- edata %>%
 ## in GJAM
 
 # Convert xdata into the correct data types
-xdata = xdata %>%
+xdata = xdata |>
   mutate(uniqueID = as.factor(uniqueID),
          Hydric = as.factor(Hydric),
          Floodplain = as.factor(Floodplain),
-         direction = as.factor(direction)) %>%
+         direction = as.factor(direction)) |>
   # Add unique ID numbers to rownames
   column_to_rownames(var = 'uniqueID')
 
-ydata = ydata %>%
-  mutate(uniqueID = as.factor(uniqueID))%>%
+ydata = ydata |>
+  mutate(uniqueID = as.factor(uniqueID)) |>
   # Take out columns that we don't need
-  select(-c(chainstree, chainstree2, chainstree3, chainstree4)) %>%
+  select(-c(chainstree, chainstree2, chainstree3, chainstree4)) |>
   # Take out columns that don't contain any information
-  select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) %>%
+  select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) |>
   column_to_rownames(var = 'uniqueID') %>%
   # Take out management area
   select(-marea)
@@ -172,7 +172,7 @@ ydata <- ydata[-zeros,]
 xdata <- xdata[-zeros,]
 
 # Save
-save(xdata, ydata, file = 'GJAMDATA/process_fixed.RData')
+save(xdata, ydata, file = 'GJAMDATA/process_FINALSOILS.RData')
 
 #### STEP 3 ####
 
@@ -186,9 +186,9 @@ dist[dist == 'missing'] <- -999
 dist[dist == 'illegible'] <- -999
 
 # Convert columns to all be numeric
-dist <- dist %>%
+dist <- dist |>
   select(-c(Unknown.tree_dist, No.data_dist, Water_dist, 
-            Wet_dist, NA_dist, X88888_dist)) %>%
+            Wet_dist, NA_dist, X88888_dist)) |>
   mutate(No.tree_dist = as.numeric(No.tree_dist),
          Oak_dist = as.numeric(Oak_dist),
          Elm_dist = as.numeric(Elm_dist),
@@ -220,8 +220,8 @@ dist <- dist %>%
          Pine_dist = as.numeric(Pine_dist),
          Alder_dist = as.numeric(Alder_dist),
          Chestnut_dist = as.numeric(Chestnut_dist),
-         Beech_dist = as.numeric(Beech_dist)) %>%
-  select(-marea) %>%
+         Beech_dist = as.numeric(Beech_dist)) |>
+  select(-marea) |>
   column_to_rownames(var = 'uniqueID')
 
 # Flag columns with missing values
@@ -230,137 +230,137 @@ missings <- missings[,2]
 missings <- unique(missings)
 
 # Find averages in those columns
-av_no.tree <- dist %>%
-  select(No.tree_dist) %>%
-  filter(No.tree_dist > -999) %>%
+av_no.tree <- dist |>
+  select(No.tree_dist) |>
+  filter(No.tree_dist > -999) |>
   dplyr::summarize(mean = mean(No.tree_dist, na.rm = T))
-av_oak <- dist %>%
-  select(Oak_dist) %>%
-  filter(Oak_dist > -999) %>%
+av_oak <- dist |>
+  select(Oak_dist) |>
+  filter(Oak_dist > -999) |>
   dplyr::summarize(mean = mean(Oak_dist, na.rm = T))
-av_elm <- dist %>%
-  select(Elm_dist) %>%
-  filter(Elm_dist > -999) %>%
+av_elm <- dist |>
+  select(Elm_dist) |>
+  filter(Elm_dist > -999) |>
   dplyr::summarize(mean = mean(Elm_dist, na.rm = T))
-av_hickory <- dist %>%
-  select(Hickory_dist) %>%
-  filter(Hickory_dist > -999) %>%
+av_hickory <- dist |>
+  select(Hickory_dist) |>
+  filter(Hickory_dist > -999) |>
   dplyr::summarize(mean = mean(Hickory_dist, na.rm = T))
-av_ash <- dist %>%
-  select(Ash_dist) %>%
-  filter(Ash_dist > -999) %>%
+av_ash <- dist |>
+  select(Ash_dist) |>
+  filter(Ash_dist > -999) |>
   dplyr::summarize(mean = mean(Ash_dist, na.rm = T))
-av_poplar <- dist %>%
-  select(Poplar_dist) %>%
-  filter(Poplar_dist > -999) %>%
+av_poplar <- dist |>
+  select(Poplar_dist) |>
+  filter(Poplar_dist > -999) |>
   dplyr::summarize(mean = mean(Poplar_dist, na.rm = T))
-av_maple <- dist %>%
-  select(Maple_dist) %>%
-  filter(Maple_dist > -999) %>%
+av_maple <- dist |>
+  select(Maple_dist) |>
+  filter(Maple_dist > -999) |>
   dplyr::summarize(mean = mean(Maple_dist, na.rm = T))
-av_sycamore <- dist %>%
-  select(Sycamore_dist) %>%
-  filter(Sycamore_dist > -999) %>%
+av_sycamore <- dist |>
+  select(Sycamore_dist) |>
+  filter(Sycamore_dist > -999) |>
   dplyr::summarize(mean = mean(Sycamore_dist, na.rm = T))
-av_otherhardwood <- dist %>%
-  select(Other.hardwood_dist) %>%
-  filter(Other.hardwood_dist > -999) %>%
+av_otherhardwood <- dist |>
+  select(Other.hardwood_dist) |>
+  filter(Other.hardwood_dist > -999) |>
   dplyr::summarize(mean = mean(Other.hardwood_dist, na.rm = T))
-av_mulberry <- dist %>%
-  select(Mulberry_dist) %>%
-  filter(Mulberry_dist > -999) %>%
+av_mulberry <- dist |>
+  select(Mulberry_dist) |>
+  filter(Mulberry_dist > -999) |>
   dplyr::summarize(mean = mean(Mulberry_dist, na.rm = T))
-av_basswood <- dist %>%
-  select(Basswood_dist) %>%
-  filter(Basswood_dist > -999) %>%
+av_basswood <- dist |>
+  select(Basswood_dist) |>
+  filter(Basswood_dist > -999) |>
   dplyr::summarize(mean = mean(Basswood_dist, na.rm = T))
-av_walnut <- dist %>%
-  select(Walnut_dist) %>%
-  filter(Walnut_dist > -999) %>%
+av_walnut <- dist |>
+  select(Walnut_dist) |>
+  filter(Walnut_dist > -999) |>
   dplyr::summarize(mean = mean(Walnut_dist, na.rm = T))
-av_cherry <- dist %>%
-  select(Cherry_dist) %>%
-  filter(Cherry_dist > -999) %>%
+av_cherry <- dist |>
+  select(Cherry_dist) |>
+  filter(Cherry_dist > -999) |>
   dplyr::summarize(mean = mean(Cherry_dist, na.rm = T))
-av_locust <- dist %>%
-  select(Locust_dist) %>%
-  filter(Locust_dist > -999) %>%
+av_locust <- dist |>
+  select(Locust_dist) |>
+  filter(Locust_dist > -999) |>
   dplyr::summarize(mean = mean(Locust_dist, na.rm = T))
-av_hackberry <- dist %>%
-  select(Hackberry_dist) %>%
-  filter(Hackberry_dist > -999) %>%
+av_hackberry <- dist |>
+  select(Hackberry_dist) |>
+  filter(Hackberry_dist > -999) |>
   dplyr::summarize(mean = mean(Hackberry_dist, na.rm = T))
-av_willow <- dist %>%
-  select(Willow_dist) %>%
-  filter(Willow_dist > -999) %>%
+av_willow <- dist |>
+  select(Willow_dist) |>
+  filter(Willow_dist > -999) |>
   dplyr::summarize(mean = mean(Willow_dist, na.rm = T))
-av_buckeye <- dist %>%
-  select(Buckeye_dist) %>%
-  filter(Buckeye_dist > -999) %>%
+av_buckeye <- dist |>
+  select(Buckeye_dist) |>
+  filter(Buckeye_dist > -999) |>
   dplyr::summarize(mean = mean(Buckeye_dist, na.rm = T))
-av_birch <- dist %>%
-  select(Birch_dist) %>%
-  filter(Birch_dist > -999) %>%
+av_birch <- dist |>
+  select(Birch_dist) |>
+  filter(Birch_dist > -999) |>
   dplyr::summarize(mean = mean(Birch_dist, na.rm = T))
-av_bgsg <- dist %>%
-  select(Black.gum.sweet.gum_dist) %>%
-  filter(Black.gum.sweet.gum_dist > -999) %>%
+av_bgsg <- dist |>
+  select(Black.gum.sweet.gum_dist) |>
+  filter(Black.gum.sweet.gum_dist > -999) |>
   dplyr::summarize(mean = mean(Black.gum.sweet.gum_dist, na.rm = T))
-av_sweetgum <- dist %>%
-  select(Sweet.gum_dist) %>%
-  filter(Sweet.gum_dist > -999) %>%
+av_sweetgum <- dist |>
+  select(Sweet.gum_dist) |>
+  filter(Sweet.gum_dist > -999) |>
   dplyr::summarize(mean = mean(Sweet.gum_dist, na.rm = T))
-av_blackgum <- dist %>%
-  select(Black.gum_dist) %>%
-  filter(Black.gum_dist > -999) %>%
+av_blackgum <- dist |>
+  select(Black.gum_dist) |>
+  filter(Black.gum_dist > -999) |>
   dplyr::summarize(mean = mean(Black.gum_dist, na.rm = T))
-av_ironwood <- dist %>%
-  select(Ironwood_dist) %>%
-  filter(Ironwood_dist > -999) %>%
+av_ironwood <- dist |>
+  select(Ironwood_dist) |>
+  filter(Ironwood_dist > -999) |>
   dplyr::summarize(mean = mean(Ironwood_dist, na.rm = T))
-av_poplartulip <- dist %>%
-  select(Poplar.tulip.poplar_dist) %>%
-  filter(Poplar.tulip.poplar_dist > -999) %>%
+av_poplartulip <- dist |>
+  select(Poplar.tulip.poplar_dist) |>
+  filter(Poplar.tulip.poplar_dist > -999) |>
   dplyr::summarize(mean = mean(Poplar.tulip.poplar_dist, na.rm = T))
-av_beech <- dist %>%
-  select(Beech_dist) %>%
-  filter(Beech_dist > -999) %>%
+av_beech <- dist |>
+  select(Beech_dist) |>
+  filter(Beech_dist > -999) |>
   dplyr::summarize(mean = mean(Beech_dist, na.rm = T))
-av_dogwood <- dist %>%
-  select(Dogwood_dist) %>%
-  filter(Dogwood_dist > -999) %>%
+av_dogwood <- dist |>
+  select(Dogwood_dist) |>
+  filter(Dogwood_dist > -999) |>
   dplyr::summarize(mean = mean(Dogwood_dist, na.rm = T))
-av_cypress <- dist %>%
-  select(Bald.cypress_dist) %>%
-  filter(Bald.cypress_dist > -999) %>%
+av_cypress <- dist |>
+  select(Bald.cypress_dist) |>
+  filter(Bald.cypress_dist > -999) |>
   dplyr::summarize(mean = mean(Bald.cypress_dist, na.rm = T))
-av_cedar <- dist %>%
-  select(Cedar.juniper_dist) %>%
-  filter(Cedar.juniper_dist > -999) %>%
+av_cedar <- dist |>
+  select(Cedar.juniper_dist) |>
+  filter(Cedar.juniper_dist > -999) |>
   dplyr::summarize(mean = mean(Cedar.juniper_dist, na.rm = T))
-av_tulip <- dist %>%
-  select(Tulip.poplar_dist) %>%
-  filter(Tulip.poplar_dist > -999) %>%
+av_tulip <- dist |>
+  select(Tulip.poplar_dist) |>
+  filter(Tulip.poplar_dist > -999) |>
   dplyr::summarize(mean = mean(Tulip.poplar_dist, na.rm = T))
-av_tamarack <- dist %>%
-  select(Tamarack_dist) %>%
-  filter(Tamarack_dist > -999) %>%
+av_tamarack <- dist |>
+  select(Tamarack_dist) |>
+  filter(Tamarack_dist > -999) |>
   dplyr::summarize(mean = mean(Tamarack_dist, na.rm = T))
-av_pine <- dist %>%
-  select(Pine_dist) %>%
-  filter(Pine_dist > -999) %>%
+av_pine <- dist |>
+  select(Pine_dist) |>
+  filter(Pine_dist > -999) |>
   dplyr::summarize(mean = mean(Pine_dist, na.rm = T))
-av_alder <- dist %>%
-  select(Alder_dist) %>%
-  filter(Alder_dist > -999) %>%
+av_alder <- dist |>
+  select(Alder_dist) |>
+  filter(Alder_dist > -999) |>
   dplyr::summarize(mean = mean(Alder_dist, na.rm = T))
-av_chestnut <- dist %>%
-  select(Chestnut_dist) %>%
-  filter(Chestnut_dist > -999) %>%
+av_chestnut <- dist |>
+  select(Chestnut_dist) |>
+  filter(Chestnut_dist > -999) |>
   dplyr::summarize(mean = mean(Chestnut_dist, na.rm = T))
 
 # Replace -999 placeholder with average for the species
-dist <- dist %>%
+dist <- dist |>
   mutate(No.tree_dist = ifelse(No.tree_dist == -999, av_no.tree$mean, No.tree_dist),
          Oak_dist = ifelse(Oak_dist == -999, av_oak$mean, Oak_dist),
          Elm_dist = ifelse(Elm_dist == -999, av_elm$mean, Elm_dist),

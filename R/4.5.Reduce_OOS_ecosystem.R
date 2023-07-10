@@ -4,7 +4,7 @@ library(tidyverse)
 
 rm(list = ls())
 
-load('GJAM DATA/Withheld For Validation/validation_process2.RData')
+load('GJAMDATA/Withheld For Validation/validation_process2.RData')
 
 ydata <- ydata |>
   mutate(Prairie = No.tree,
@@ -34,4 +34,4 @@ edata <- edata |>
   mutate_all(~ifelse(is.nan(.), NA, .)) |>
   select(c(Prairie_dist, Savanna_dist, Forest_dist))
 
-save(xdata, edata, ydata, file = 'GJAM DATA/Withheld For Validation/validation_process_reduce.RData')
+save(xdata, edata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process_reduce.RData')

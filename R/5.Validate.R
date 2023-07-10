@@ -10,33 +10,22 @@ library(lme4)
 library(piecewiseSEM)
 
 # Load output from GJAM
-load('out/reduced_taxa-all_cov/reduced_taxa-all_cov_1.RData')
-#load('out/all_taxa-all_cov/all_taxa-all_cov_1.RData')
-
-# Check to make sure convergence looks okay since we only have 1 chain
-#gjamPlot(out)
-
-# Looks good
+load('out/FINAL_RUNS/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
-rm(edata, elist, mlist, xdata, ydata, site_effort)
+rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-load('GJAM DATA/Withheld For Validation/validation_process_reduce.RData')
-#load('GJAM DATA/Withheld For Validation/validation_process2.RData')
+load('GJAMDATA/Withheld For Validation/validation_process2.RData')
 
-# Where there are NA's in the aspect covariate, make it a random value
-# within the range of the data
-# I'm doing this because gjamPredict() doesn't tolerate NA and since we 
-# don't have any information, just make it random
-nas <- length(which(is.na(xdata[,4])))
-rands <- runif(n = nas, min = min(xdata[,4], na.rm = T), max = max(xdata[,4], na.rm = T))
-xdata[is.na(xdata)] <- rands
+# Hack. this has no effect on the results.
+xdata <- xdata |>
+  mutate(Aspect = 1)
 
 #### Simple validation ####
 
 # Specify data list
-newdata <- list(xdata = xdata, nsim = 1000, ematrix = edata)
+newdata <- list(xdata = xdata, nsim = 1000)
 
 # Make prediction
 pred <- gjamPredict(output = out, newdata = newdata)
@@ -114,10 +103,17 @@ comp <- pred_pr |>
 colnames(comp) <- c('Taxon', 'Probability', 'Index', 'Observed')
 
 comp |>
+  mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum', Taxon),
+         Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+         Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+         Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+         Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar', Taxon)) |>
   ggplot(aes(x = Probability, y = Observed)) +
   geom_point() +
   facet_wrap(~Taxon, scales = 'free') +
-  geom_smooth(method = 'glm', method.args = list(family = 'binomial'))
+  geom_smooth(method = 'glm', method.args = list(family = 'binomial'), 
+              color = 'maroon', fill = 'maroon') +
+  theme_minimal()
 
 # Overall model
 form <- glm(Observed ~ Probability, family = binomial, data = comp)
@@ -163,10 +159,10 @@ comp_otherconifer <- comp |>
 comp_otherhardwood <- comp |>
   filter(Taxon == 'Other.hardwood')
 
-form_notree <- glm(Observed ~ Predicted, family = binomial, data = comp_notree)
+form_notree <- glm(Observed ~ Probability, family = binomial, data = comp_notree)
 with(summary(form_notree), 1 - deviance/null.deviance)
 
-form_oak <- glm(Observed~Predicted, family = binomial, data = comp_oak)
+form_oak <- glm(Observed~Probability, family = binomial, data = comp_oak)
 with(summary(form_oak), 1 - deviance/null.deviance)
 
 form_elm <- glm(Observed ~ Probability, family = binomial, data = comp_elm)
@@ -186,12 +182,10 @@ with(summary(form_basswood), 1 - deviance/null.deviance)
 
 #### Validation with conditional prediction ####
 
-load('out/all_taxa-all_cov/all_taxa-all_cov_1.RData')
+load('out/FINAL_RUNS/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
 rm(edata, elist, mlist, xdata, ydata, site_effort)
-load('GJAM DATA/Withheld For Validation/validation_process2.RData')
-nas <- length(which(is.na(xdata[,4])))
-rands <- runif(n = nas, min = min(xdata[,4], na.rm = T), max = max(xdata[,4], na.rm = T))
-xdata[is.na(xdata)] <- rands
+load('GJAMDATA/Withheld For Validation/validation_process2.RData')
+xdata <- xdata |> mutate(Aspect = 1)
 
 # Predict half of species conditional on other half
 rand <- sample(1:ncol(ydata), size = round(ncol(ydata)/2))
@@ -217,9 +211,17 @@ comp <- pred_yMu |>
 colnames(comp) <- c('Index', 'Taxon', 'Predicted', 'Observed')
 
 comp |>
-  ggplot(aes(x = Predicted, y = Observed)) +
+  mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum', Taxon),
+         Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+         Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+         Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+         Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar', Taxon)) |>
+ggplot(aes(x = Predicted, y = Observed)) +
   geom_point() +
-  facet_wrap(~Taxon)
+  facet_wrap(~Taxon) +
+  geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
+              color = 'maroon', fill = 'maroon') +
+  theme_minimal()
 
 # Overall model
 form2 <- glm(Observed ~ Predicted, family = binomial, data = comp)

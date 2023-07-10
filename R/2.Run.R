@@ -17,7 +17,7 @@ nburn <- 5
 ## End changes ##
 
 # Load data from 1.5.Reduce.R
-load('GJAMDATA/process2_fixed.RData')
+load('GJAMDATA/process2_FINALSOILS.RData')
 load('GJAMDATA/effort_fixed.RData')
 
 # Reformat effort
@@ -31,9 +31,10 @@ elist = list(columns = 1:ncol(ydata),
 # Define formula
 # Presence/absence at each site is a function of each of the environmental covariates
 # with no interactions
-form1 = as.formula(~ mean.SlopeProjected + direction + mean.CAC +
-                     mean.CEC + mean.CLA + mean.SAN + mean.WAT + mean.SWI + 
-                     Hydric + Floodplain + totalPPT + MeanTEMP)
+form1 = as.formula(~ Slope + CAC + CEC + CLA + SAN + SIL + 
+                     WAT + mean.SWI + Hydric + Floodplain +
+                     totalPPT + MeanTEMP #+ direction
+                   )
 
 # Make list of priors for each parameter
 #prior <- gjamPriorTemplate(formula = form1,

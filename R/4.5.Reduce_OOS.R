@@ -6,8 +6,8 @@ rm(list = ls())
 library(tidyverse)
 library(corrplot)
 
-load('GJAM DATA/Withheld For Validation/validation_process.RData')
-load('GJAM DATA/Withheld For Validation/validation_effort.RData')
+load('GJAMDATA/Withheld For Validation/validation_process.RData')
+load('GJAMDATA/Withheld For Validation/validation_effort.RData')
 
 # Reduce dimensions
 new.ydata <- ydata |>
@@ -71,7 +71,7 @@ zeros <- which(zeros == 0)
 
 # Let's make sure it looks like we think it does
 new.ydata |>
-  pivot_longer(cols = c(No.tree:Other.hardwood)) |>
+  pivot_longer(cols = c(Elm:Other.hardwood)) |>
   group_by(name) |>
   summarize(count = length(which(value == 1))) |>
   ggplot(aes(x = reorder(name, count), y = count)) +
@@ -98,4 +98,4 @@ ydata <- new.ydata
 edata <- new.edata
 
 # Save
-save(xdata, ydata, edata, site_effort, file = 'GJAM DATA/Withheld For Validation/validation_process2.RData')
+save(xdata, ydata, edata, site_effort, file = 'GJAMDATA/Withheld For Validation/validation_process2.RData')

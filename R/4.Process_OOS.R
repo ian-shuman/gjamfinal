@@ -14,8 +14,8 @@ library(tidyverse)
 ## and ensuring all columns are present in all matrices in ydata and edata
 
 # Read in file names that we need to loop over
-xfiles <- list.files('GJAM DATA/Withheld For Validation/X/Random Effects/')
-yfiles <- list.files('GJAM DATA/Withheld For Validation/Y/')
+xfiles <- list.files('GJAMDATA/Withheld For Validation/X/New Soils Data/Aspect/')
+yfiles <- list.files('GJAMDATA/Withheld For Validation/Y/')
 
 # Storage
 xdata_list <- list()
@@ -24,11 +24,11 @@ yedata_list <- list()
 # Read in files
 for(i in 1:length(xfiles)){
   filename <- xfiles[i]
-  pathname <- paste0('GJAM DATA/Withheld For Validation/X/Random Effects/', filename)
+  pathname <- paste0('GJAMDATA/Withheld For Validation/X/New Soils Data/Aspect/', filename)
   xdata_list[[i]] <- read.csv(pathname)
   
   filename <- yfiles[i]
-  pathname <- paste0('GJAM DATA/Withheld For Validation/Y/', filename)
+  pathname <- paste0('GJAMDATA/Withheld For Validation/Y/', filename)
   yedata_list[[i]] <- read.csv(pathname)
 }
 
@@ -151,8 +151,6 @@ xdata <- xdata |>
   mutate(uniqueID = as.factor(uniqueID),
          Hydric = as.factor(Hydric),
          Floodplain = as.factor(Floodplain)) |>
-  # Remove correlated covariates
-  select(-c(GS_ppet, mean.KSA, mean.SIL)) |>
   # Add unique ID numbers to rownames
   column_to_rownames(var = 'uniqueID')
 
@@ -174,7 +172,7 @@ ydata <- ydata[-zeros,]
 xdata <- xdata[-zeros,]
 
 # Save
-save(xdata, ydata, file = 'GJAM DATA/Withheld For Validation/validation_process.RData')
+save(xdata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process.RData')
 
 #### STEP 3 ####
 
@@ -387,4 +385,4 @@ site_effort <- site_effort[-zeros]
 effort <- effort[-zeros,]
 
 # Save
-save(effort,  site_effort, file = 'GJAM DATA/Withheld For Validation/validation_effort.RData')
+save(effort,  site_effort, file = 'GJAMDATA/Withheld For Validation/validation_effort.RData')
