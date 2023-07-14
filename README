@@ -1,0 +1,27 @@
+This repo contains code written by AM Willson for Shuman et al. (in prep). The code uses GJAM to investigate the vegetation-environment relationship during the period of European settlement of the U.S. Midwest, as documented via the Public Land Surveys of the 19th century.
+
+Any data needed to run the code is currently available upon request. Upon publication, data will become publicly available.
+
+The bulk of the repository is housed in the R subdirectory. The scripts within the R subdirectory are ordered according to the sequence of steps that should be taken to recreate the anlaysis. Descriptions of each step are as follows:
+
+1.Process.R: Takes tables of response (ydata) and driver (xdata) variables and formats them according to the format required by the gjam() function. The edata matrix is also processed. This matrix can be used to inform the "effort" (see Clark et al. GJAM description) used in making each observation. For the present research, effort/edata was ultimately dropped from the anlaysis and there may be bugs in this portion of the code.
+
+1.5.Reduce.R: This step reduces the total number of taxa among the response variables. This was done because there were several taxa in our dataset with few observations, reducing the inferential power of our analysis. We combine rare taxa into the categories "other hardwood" and "other conifer" in this step. We also combine related taxon groups, such as poplar/tulip poplar, poplar, and tulip poplar. These taxa are impossible to differentiate in the Public Land Survey record.
+
+2.Run.R: This script is a template for running the GJAM model using the formatted xdata and ydata data objects from the previous steps. This script should be changed according to the desired specifications of the model run. We used four different versions of this script for our final analysis. Each version contains xdata with the following covariates: mean precipitation, mean temperature, topograhpic slope, Saga wetness index, presence of hydric soils, presence of a floodplain, soil CaCO3 concentration, cation exchange capacity, soil sand content, and soil water content. 2/4 versions additionally contained topographic direction (N, S, E, or W). 2/4 versions used all available taxa after 1.5.Reduce.R as response variables. 2/4 versions aggregated the taxa from 1.5.Reduce.R into three ecosystem types: prairie, savanna, and forest. In summary, the four versions we implemented are (1) all taxa, no topographic direction, (2) all taxa, topographic direction, (3) ecosystem, no topographic direction, (4) ecosystem, topographic direction.
+
+3.Combine.R: GJAM only allows for one chain to be run at a time. Given that the model is a Bayesian model relying on MCMC, multiple chains are useful for estimating the full uncertainty of the model and to reduce the impact of initial chain values on inference. We therefore ran the model 4 times using identical specifications in the 2.Run.R script and we then combine the chains into a more usable format here.
+
+4.Process_OOS.R: This script mirrors the script 1.Process.R for data we withheld for out-of-sample validation.
+
+4.5.Reduce_OOS.R: This script mirrors the script 1.5.Reduce.R for data we withheld for out-of-sample validation and follows directly from 4.Process_OOS.R.
+
+4.5.Reduce_OOS_Ecosystem.R: This script is similar to 4.5.Reduce_OOS.R but processes the out-of-sample data to contain three ecosystem categories, consistent with the ecosystem-level runs described under 2.Run.R.
+
+5.Validate.R: This script runs out-of-sample validation. Specifications should be changed according to how GJAM was configured in 2.Run.R.
+
+Graphs_2.R: This script produces the figures used in Shuman et al. (in prep) for the taxon-level model runs.
+
+Graphs_2_ecosystem.R: This script produces the figures used in Shuman et al. (in prep) for the ecosystem-level model runs.
+
+utils.R: This script contains utility functions for the code. Specifically, there is a function for manually calculating the Gelman Rubin diagnostic for assessing chain convergence because our output is not in the proper format to use the default functions available in R. I additionally added resampling of the chains in this function to account for the fact that some chains appear to be identical in our output. Specifically, I resampled 20 the 4 chains 20 times and calculated the Gelman Rubin diagnostic on each of the resampled chain configurations. Then, I took the maximum diagnostic statistic, so that artificially low Rhat is likely to be removed at least once in 20 different configurations.
