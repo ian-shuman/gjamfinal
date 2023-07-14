@@ -140,13 +140,22 @@ edata <- edata |>
   select(-filename) |>
   mutate(uniqueID = ydata$uniqueID)
 
+full_data <- xdata |>
+  full_join(ydata, by = 'uniqueID')
+
+## MAKE SURE TO CHANGE IF XDATA CHANGES
+xdata <- full_data[,1:18]
+ydata <- full_data[,c(1,19:61)]
+
+colnames(xdata)[18] <- 'marea'
+
 #### STEP 2 ####
 
 ## This step takes the processed data and formats it correctly for use
 ## in GJAM
 
 # Convert xdata into the correct data types
-xdata = xdata |>
+xdata <- xdata |>
   mutate(uniqueID = as.factor(uniqueID),
          Hydric = as.factor(Hydric),
          Floodplain = as.factor(Floodplain),
@@ -154,15 +163,13 @@ xdata = xdata |>
   # Add unique ID numbers to rownames
   column_to_rownames(var = 'uniqueID')
 
-ydata = ydata |>
+ydata <- ydata |>
   mutate(uniqueID = as.factor(uniqueID)) |>
   # Take out columns that we don't need
-  select(-c(chainstree, chainstree2, chainstree3, chainstree4)) |>
+  select(-c(chainstree, chainstree2, chainstree3, chainstree4, marea.y)) |>
   # Take out columns that don't contain any information
   select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) |>
-  column_to_rownames(var = 'uniqueID') %>%
-  # Take out management area
-  select(-marea)
+  column_to_rownames(var = 'uniqueID')
 
 # Remove rows with no information
 zeros <- apply(ydata, 1, sum)
