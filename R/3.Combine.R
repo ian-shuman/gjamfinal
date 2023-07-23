@@ -148,8 +148,7 @@ bFacGibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bFacGibbs |>
   select(c(colnames(bFacGibbs)[21:40], iter, chain)) |>
@@ -161,8 +160,7 @@ bFacGibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bFacGibbs |>
   select(c(colnames(bFacGibbs)[41:60], iter, chain)) |>
@@ -174,8 +172,7 @@ bFacGibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bFacGibbs |>
   select(c(colnames(bFacGibbs)[61:80], iter, chain)) |>
@@ -331,8 +328,7 @@ bgibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bgibbs |>
   select(c(colnames(bgibbs)[21:40], iter, chain)) |>
@@ -344,8 +340,7 @@ bgibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bgibbs |>
   select(c(colnames(bgibbs)[41:60], iter, chain)) |>
@@ -357,8 +352,7 @@ bgibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bgibbs |>
   select(c(colnames(bgibbs)[61:80], iter, chain)) |>
@@ -490,8 +484,7 @@ bgibbsUn |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bgibbsUn |>
   select(c(colnames(bgibbsUn)[21:40], iter, chain)) |>
@@ -503,8 +496,7 @@ bgibbsUn |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bgibbsUn |>
   select(c(colnames(bgibbsUn)[41:60], iter, chain)) |>
@@ -516,8 +508,7 @@ bgibbsUn |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Coefficient Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 bgibbsUn |>
   select(c(colnames(bgibbsUn)[61:80], iter, chain)) |>
@@ -647,8 +638,7 @@ fSensGibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Sensitivity Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 fSensGibbs_diag <- c()
 for(i in 1:(ncol(fSensGibbs)-2)){
@@ -671,8 +661,7 @@ sgibbs |>
   theme(legend.position = 'none') +
   xlab('Iteration') + ylab('Covariance Estimate') +
   theme_minimal() +
-  scale_color_manual(values = c('#4477aa', '#66ccee', '#218833', '#ccbb45', '#ef6677'))
-  #scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
 sgibbs |>
   select(c(colnames(sgibbs)[21:40], iter, chain)) |>

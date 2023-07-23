@@ -9,7 +9,7 @@ library(corrplot)
 library(cowplot)
 library(RColorBrewer)
 
-load('out/FINAL_RUNS/Reduced_taxa~all_cov_NOASPECT/combined.RData')
+load('out/FINAL_RUNS/Reduced_taxa~all_cov_ASPECT/combined.RData')
 
 ## Correlations between taxa and drivers
 
@@ -135,16 +135,22 @@ sens |>
   coord_flip() +
   xlab('') + ylab(expression(paste('Sensitivity (', hat(F), ')'))) +
   theme_minimal() +
-  scale_color_manual(values = c('#88ccee', '#88ccee', 
-                                #'#aa4499', 
-                                '#999932',
-                                #'#aa4499', 
-                                '#999932',
-                                '#aa4499', #'#aa4499', '#aa4499',
-                                '#999932', '#999932', 
-                                '#aa4499', '#aa4499',
-                                '#999932',
-                                '#aa4499'), name = '')
+  scale_color_manual(values = c('#88ccee', # precipitation - climate
+                                '#aa4499', # floodplain - topography
+                                '#88ccee', # temperature - climate
+                                '#999932', # hydric soil - soil
+                                '#999932', # cac03 - soil
+                                '#999932', # soil % clay - soil
+                                '#aa4499', # saga wetness index - topography
+                                '#999932', # available water content - soil
+                                '#999932', # soil % sand - soil
+                                '#999932', # cation exchange capacity - soil
+                                '#aa4499', # slope - topography
+                                '#aa4499', # north-facing slope - topography
+                                '#aa4499', # south-facing slope - topography
+                                '#aa4499', # east-facing slope - topography
+                                '#aa4499' # west-facing slope - topography
+                                ), name = '')
 
 ## Correaltions between ecosystems
 

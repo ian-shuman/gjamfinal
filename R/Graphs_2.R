@@ -165,15 +165,22 @@ sens |>
   coord_flip() +
   xlab('') + ylab(expression(paste('Sensitivity (', hat(F) ,')'))) +
   theme_minimal() +
-  scale_color_manual(values = c('#88ccee', '#88ccee',
-                                '#999932', '#999932',
-                                #'#aa4499',
-                                '#999932',
-                                #'#aa4499', '#aa4499',
-                                '#999932',
-                                #'#aa4499',
-                                '#999932',
-                                '#aa4499', '#aa4499', '#aa4499', '#aa4499'), name = '')
+  scale_color_manual(values = c('#88ccee', # temperature - climate
+                                '#88ccee', # precipitation - climate
+                                '#999932', # cation exchange capacity - soil
+                                '#aa4499', # floodplain - topography
+                                '#999932', # soil % clay - soil
+                                '#999932', # hydric soil - soil
+                                '#999932', # CaCO3 - soil
+                                '#999932', # available water content - soil
+                                '#999932', # soil % sand - soil
+                                '#aa4499', # saga wetness index - topography
+                                '#aa4499', # south facing slope - topography
+                                '#aa4499', # slope - topography
+                                '#aa4499', # north-facing slope - topography
+                                '#aa4499', # east-facing slope -topography
+                                '#aa4499' # west-facing slope - topography
+                                ), name = '')
 
 
 ## Correlations between taxa

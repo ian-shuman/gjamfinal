@@ -10,15 +10,13 @@ library(piecewiseSEM)
 library(dplyr)
 
 # Load output from GJAM
-#load('out/FINAL_RUNS/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
-load('reduced_taxa-all_cov_NOASPECT_1.RData')
+load('out/FINAL_RUNS/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-#load('GJAMDATA/Withheld For Validation/validation_process2.RData')
-load('validation_process_reduce.RData')
+load('GJAMDATA/Withheld For Validation/validation_process2.RData')
 
 # Hack. this has no effect on the results.
 xdata <- xdata |>
