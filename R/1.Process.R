@@ -57,7 +57,7 @@ ydata <- ydata |>
   select(-filename) |>
   mutate(uniqueID = paste0(marea,'_',uniqueID))
 
-# Join xdata and ydata but the unique ID
+# Join xdata and ydata by the unique ID
 full_data <- xdata |>
   full_join(ydata, by = 'uniqueID')
 
