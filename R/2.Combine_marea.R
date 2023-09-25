@@ -9,39 +9,57 @@ rm(list = ls())
 
 library(ggplot2)
 library(fields)
+library(dplyr)
 
+# Load out-of-sample data
 load('GJAMDATA/Withheld For Validation/validation_process.RData')
 
+# Rename
 xdata_oos <- xdata
 ydata_oos <- ydata
 
+# Add a sample of "out-of-sample" and
+# manipulate management area column
 xdata_oos <- xdata_oos |>
   mutate(type = as.factor('oos'),
          marea = as.factor(marea))
 
+# Load in-sample data
 load('GJAMDATA/process2_FINALSOILS.RData')
 
+# Add the same column to the in-sample
+# and manipulate management area
 xdata <- xdata |>
   mutate(type = as.factor('is'),
          marea = as.factor(marea))
 
+# map of study region for plotting
 states <- map_data('state', region = c('illinois', 'indiana'))
 
 ## Find approximate center of each management area
 
+# combine in-sample and out-of-sample data
 xdata <- rbind(xdata, xdata_oos)
 
+# Find the unique managmeent areas in both
 mareas <- as.character(unique(xdata$marea))
+# Number of management areas
 n_marea <- length(mareas)
+# Storage
 coords <- matrix(, nrow = n_marea, ncol = 3)
 
+# For each management area
 for(i in 1:n_marea){
+  # Log coordinates
   coords[i,1] <- mareas[i]
+  # Subset  data
   sub <- subset(xdata, marea == mareas[i])
+  # Find approximate center using average of lat and long
   coords[i,2] <- mean(sub$lat)
   coords[i,3] <- mean(sub$long)
 }
 
+# Formatting
 colnames(coords) <- c('marea', 'lat', 'long')
 coords$lat <- as.numeric(coords$lat)
 coords$long <- as.numeric(coords$long)
@@ -53,21 +71,26 @@ ggplot() +
   geom_point(data = xdata, aes(x = long, y = lat)) +
   geom_point(data = coords, aes(x = long, y = lat), color = 'red')
 
-# Find the closest in-sample management area for each out-of-sample managemnet area
+# Find the closest in-sample management area for each out-of-sample management area
 in_sample <- unique(select(subset(xdata, type == 'is'), 'marea'))
 out_sample <- unique(select(subset(xdata, type == 'oos'), 'marea'))
 
+# Add coordinates to in-sample and out-of-sample dataframes
 in_sample <- in_sample |>
   left_join(coords, by = 'marea')
 out_sample <- out_sample |>
   left_join(coords, by = 'marea')
 
+# Find distances between out-of-sample and in-sample management areas
 dists <- rdist(select(in_sample, lat, long),
                select(out_sample, lat, long))
 
+# Find the closest in-sample management area for each
+# out-of-sample management area
 closest_points <- apply(dists, 2, which.min)
 closest_marea <- in_sample$marea[closest_points]
 
+# Add to dataframe
 out_sample$closest <- closest_marea
 
 # Replace management area in out-of-sample data based on out_sample dataframe
