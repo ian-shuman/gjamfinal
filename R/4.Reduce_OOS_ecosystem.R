@@ -34,4 +34,4 @@ edata <- edata |>
   mutate_all(~ifelse(is.nan(.), NA, .)) |>
   select(c(Prairie_dist, Savanna_dist, Forest_dist))
 
-save(xdata, edata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process_reduce.RData')
+save(xdata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process_reduce.RData')

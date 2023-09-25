@@ -6,11 +6,12 @@ rm(list = ls())
 library(tidyverse)
 library(corrplot)
 
-load('GJAMDATA/Withheld For Validation/validation_process.RData')
-load('GJAMDATA/Withheld For Validation/validation_effort.RData')
+load('GJAMDATA/Withheld For Validation/validation_process_fixmarea.RData')
+
+xdata <- xdata_oos
 
 # Reduce dimensions
-new.ydata <- ydata |>
+new.ydata <- ydata_oos |>
   # Make a combined "tulip poplar" column
   mutate(TP = Poplar + Poplar.tulip.poplar) |>
   # If more than one of the above categories was present at one corner
@@ -98,4 +99,4 @@ ydata <- new.ydata
 edata <- new.edata
 
 # Save
-save(xdata, ydata, edata, site_effort, file = 'GJAMDATA/Withheld For Validation/validation_process2.RData')
+save(xdata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process2.RData')
