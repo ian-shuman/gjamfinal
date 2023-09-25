@@ -3,14 +3,13 @@
 ## Author: AM Willson
 
 ## This script is currently set up to run on ND's CRC cluster
+## Minimal changes are required for loading libraries and indicating
+## correct working directory when working on a different cluster.
+## GJAM is unable to run on a personal machine with typical specs with
+## these data
 
 rm(list = ls())
-require(crayon, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
-require(withr, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
-require(tzdb, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
-require(backports, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
-require(broom, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
-require(tidyverse, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
+
 require(gjam, lib.loc = '/afs/crc.nd.edu/user/i/ishuman2/Rlibs2')
 
 ## Change only these variables ##
@@ -21,7 +20,7 @@ nburn <- 200
 
 ## End changes ##
 
-# Load data from 1.5.Reduce.R
+# Load data from 3.Reduce.R
 load('process2_FINALSOILS.RData')
 
 #### Running GJAM ####

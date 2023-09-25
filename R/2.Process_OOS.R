@@ -7,6 +7,7 @@ rm(list = ls())
 
 library(dplyr)
 library(tibble)
+library(tidyr)
 
 #### STEP 1 ####
 
@@ -83,13 +84,26 @@ xdata <- xdata |>
 
 ydata <- ydata |>
   mutate(uniqueID = as.factor(uniqueID)) |>
-  # Take out columsn that we don't need
+  # Take out columns that we don't need
   select(-c(chainstree, chainstree2, chainstree3, chainstree4)) |>
   # Take out columns that don't contain any information
   select(-c(No.data, Water, Unknown.tree, NA.)) |>
   column_to_rownames(var = 'uniqueID') |>
   # Take out management area
-  select(-marea.y)
+  select(-marea.y) |>
+  replace_na(list(NA. = 0,
+                  Birch = 0,
+                  Mulberry = 0,
+                  Buckeye = 0,
+                  Locust = 0,
+                  Poplar.tulip.poplar = 0,
+                  Beech = 0,
+                  Black.gum.sweet.gum = 0,
+                  Dogwood = 0,
+                  Black.gum = 0,
+                  Bald.cypress = 0,
+                  Sweet.gum = 0,
+                  Chestnut = 0))
 
 # Remove rows with no information
 zeros <- apply(ydata, 1, sum)
