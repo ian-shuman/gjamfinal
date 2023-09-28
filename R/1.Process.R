@@ -6,11 +6,12 @@ rm(list = ls())
 
 library(dplyr)
 library(tibble)
+library(tidyr)
 
 # Read in file names that we need to loop over
 ## These data can be accessed in the repository listed in
 ## the corresponding publication
-xfiles <- list.files('GJAMDATA/X/New Soils Data/Aspect/')
+xfiles <- list.files('GJAMDATA/X/')
 yfiles <- list.files('GJAMDATA/Y/')
 
 # Storage
@@ -20,7 +21,7 @@ yedata_list <- list()
 # Read in files and put all data into list
 for(i in 1:length(xfiles)){
   filename <- xfiles[i]
-  pathname <- paste0('GJAMDATA/X/New Soils Data/Aspect/',filename)
+  pathname <- paste0('GJAMDATA/X/',filename)
   xdata_list[[i]] <- read.csv(pathname)
   xdata_list[[i]]$filename <- filename
   
@@ -84,7 +85,16 @@ ydata <- ydata |>
   select(-c(chainstree, chainstree2, chainstree3, chainstree4, marea.y)) |>
   # Take out columns that don't contain any information
   select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) |>
-  column_to_rownames(var = 'uniqueID')
+  column_to_rownames(var = 'uniqueID') |>
+  replace_na(list(No.tree = 0, Oak = 0, Elm = 0, Hickory = 0,
+                  Ash = 0, Unknown.tree = 0, Poplar = 0, Maple = 0,
+                  Sycamore = 0, Other.hardwood = 0, Mulberry = 0,
+                  Basswood = 0, Walnut = 0, Cherry = 0, Locust = 0,
+                  Hackberry = 0, Willow = 0, Buckeye = 0, Birch = 0,
+                  Black.gum.sweet.gum = 0, Sweet.gum = 0, Black.gum = 0,
+                  Ironwood = 0, Poplar.tulip.poplar = 0, Beech = 0,
+                  Dogwood = 0, Bald.cypress = 0, Cedar.juniper = 0,
+                  Tulip.poplar = 0, Tamarack = 0, Pine = 0, Alder = 0, Chestnut = 0))
 
 # Remove rows with no information
 zeros <- apply(ydata, 1, sum)
@@ -94,4 +104,4 @@ ydata <- ydata[-zeros,]
 xdata <- xdata[-zeros,]
 
 # Save
-save(xdata, ydata, file = 'GJAMDATA/process_FINALSOILS.RData')
+save(xdata, ydata, file = 'GJAMDATA/processed_xydata.RData')
