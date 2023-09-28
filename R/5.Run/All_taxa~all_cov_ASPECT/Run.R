@@ -21,7 +21,7 @@ nburn <- 200
 ## End changes ##
 
 # Load data from 3.Reduce.R
-load('process2_FINALSOILS.RData')
+load('processed_xydata_2')
 
 #### Running GJAM ####
 

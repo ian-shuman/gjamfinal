@@ -20,7 +20,7 @@ nburn <- 200
 ## End changes ##
 
 # Load data from 3.Reduce_ecosystem.R
-load('process2_FINALSOILS_ecosystem.RData')
+load('processed_xydata_2_ecosystem.RData')
 
 # Define formula
 # Presence/absence at each site is a function of each of the environmental covariates
