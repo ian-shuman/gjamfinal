@@ -12,11 +12,7 @@ library(fields)
 library(dplyr)
 
 # Load out-of-sample data
-load('GJAMDATA/Withheld For Validation/validation_process.RData')
-
-# Rename
-xdata_oos <- xdata
-ydata_oos <- ydata
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata.RData')
 
 # Add a sample of "out-of-sample" and
 # manipulate management area column
@@ -25,7 +21,7 @@ xdata_oos <- xdata_oos |>
          marea = as.factor(marea))
 
 # Load in-sample data
-load('GJAMDATA/process2_FINALSOILS.RData')
+load('GJAMDATA/processed_xydata.RData')
 
 # Add the same column to the in-sample
 # and manipulate management area
@@ -61,9 +57,9 @@ for(i in 1:n_marea){
 
 # Formatting
 colnames(coords) <- c('marea', 'lat', 'long')
+coords <- as.data.frame(coords)
 coords$lat <- as.numeric(coords$lat)
 coords$long <- as.numeric(coords$long)
-coords <- as.data.frame(coords)
 
 # Check to make sure the centers are representative
 ggplot() +
@@ -109,4 +105,4 @@ ggplot() +
   geom_point(data = xdata_oos, aes(x = long, y = lat, color = marea)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA)
 
-save(xdata_oos, ydata_oos, file = 'GJAMDATA/Withheld For Validation/validation_process_fixmarea.RData')
+save(xdata_oos, ydata_oos, file = 'GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea.RData')

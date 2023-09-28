@@ -16,7 +16,7 @@ library(tidyr)
 ## and ensuring all columns are present in all matrices in ydata and edata
 
 # Read in file names that we need to loop over
-xfiles <- list.files('GJAMDATA/Withheld For Validation/X/New Soils Data/Aspect/')
+xfiles <- list.files('GJAMDATA/Withheld For Validation/X/')
 yfiles <- list.files('GJAMDATA/Withheld For Validation/Y/')
 
 # Storage
@@ -26,7 +26,7 @@ yedata_list <- list()
 # Read in files
 for(i in 1:length(xfiles)){
   filename <- xfiles[i]
-  pathname <- paste0('GJAMDATA/Withheld For Validation/X/New Soils Data/Aspect/', filename)
+  pathname <- paste0('GJAMDATA/Withheld For Validation/X/', filename)
   xdata_list[[i]] <- read.csv(pathname)
   xdata_list[[i]]$filename <- filename
   
@@ -91,19 +91,14 @@ ydata <- ydata |>
   column_to_rownames(var = 'uniqueID') |>
   # Take out management area
   select(-marea.y) |>
-  replace_na(list(NA. = 0,
-                  Birch = 0,
-                  Mulberry = 0,
-                  Buckeye = 0,
-                  Locust = 0,
-                  Poplar.tulip.poplar = 0,
-                  Beech = 0,
-                  Black.gum.sweet.gum = 0,
-                  Dogwood = 0,
-                  Black.gum = 0,
-                  Bald.cypress = 0,
-                  Sweet.gum = 0,
-                  Chestnut = 0))
+  replace_na(list(Hackberry = 0, Elm = 0, Oak = 0, Maple = 0,
+                  Ash = 0, Hickory = 0, Willow = 0, Poplar = 0,
+                  No.tree = 0, Walnut = 0, Basswood = 0, Sycamore = 0,
+                  Cherry = 0, Ironwood = 0, Pine = 0, Other.hardwood = 0,
+                  Birch = 0, Mulberry = 0, Buckeye = 0, Locust = 0,
+                  Poplar.tulip.poplar = 0, Beech = 0, Black.gum.sweet.gum = 0,
+                  Dogwood = 0, Black.gum = 0, Bald.cypress = 0,
+                  Sweet.gum = 0, Chestnut = 0))
 
 # Remove rows with no information
 zeros <- apply(ydata, 1, sum)
@@ -112,5 +107,8 @@ zeros <- which(zeros == 0)
 ydata <- ydata[-zeros,]
 xdata <- xdata[-zeros,]
 
+ydata_oos <- ydata
+xdata_oos <- xdata
+
 # Save
-save(xdata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process.RData')
+save(xdata_oos, ydata_oos, file = 'GJAMDATA/Withheld For Validation/validation_processed_xydata.RData')
