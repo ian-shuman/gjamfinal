@@ -4,7 +4,11 @@
 
 rm(list = ls())
 
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# load R script with modified version of gelman statistic
 source('R/utils.R')
 
 # Specify which model you were using
@@ -17,103 +21,49 @@ source('R/utils.R')
 type <- 'Reduced_taxa~all_cov_NOASPECT'
 
 # List all the outputs we have for that model
-files <- list.files(path = paste0('out/FINAL_RUNS/', type))
-nchains <- length(files)
+files <- list.files(path = paste0('out/', type))
+if('combined.RData' %in% files) files <- files[files != 'combined.RData']
 
-# Loop over the files to store them in one object
-comb_out <- list()
+# Pre-specifeid number of chains and interations
+nchains <- length(files)
+niter <- 1000
+
+# Loop over the files
 ind <- 1
 for(i in files){
-  file_name <- paste0('out/FINAL_RUNS/', type, '/', i)
+  file_name <- paste0('out/', type, '/', i)
+  # Load file
   load(file_name)
-  comb_out[[ind]] <- out
+  # Initialize with first file
+  if(i == files[1]){
+    # Save the chains for each of the outputs in separate matrices
+    bFacGibbs <- out$chains$bFacGibbs
+    bgibbs <- out$chains$bgibbs
+    bgibbsUn <- out$chains$bgibbsUn
+    fSensGibbs <- out$chains$fSensGibbs
+    sgibbs <- out$chains$sgibbs
+  }else{
+    # Rbind if not the first file
+    bFacGibbs <- rbind(bFacGibbs, out$chains$bFacGibbs)
+    bgibbs <- rbind(bgibbs, out$chains$bgibbs)
+    bgibbsUn <- rbind(bgibbsUn, out$chains$bgibbsUn)
+    fSensGibbs <- rbind(fSensGibbs, out$chains$fSensGibbs)
+    sgibbs <- rbind(sgibbs, out$chains$sgibbs)
+  }
   ind <- ind + 1
 }
 
-# Now let's combine chains, which is what we really care about
-# Every run should have five outputs in chains:
-  # bFacGibbs
-  # bgibbs
-  # bgibbsUn
-  # fSensGibbs
-  # sgibbs
-# We'll work with these separately
+# Formatting
+bFacGibbs <- as.data.frame(bFacGibbs)
+bgibbs <- as.data.frame(bgibbs)
+bgibbsUn <- as.data.frame(bgibbsUn)
+fSensGibbs <- as.data.frame(fSensGibbs)
+sgibbs <- as.data.frame(sgibbs)
 
-# Number of iterations per chain
-niter <- nrow(comb_out[[1]]$chains$bFacGibbs)
-
-# Initialize each matrix with the first chain
-# Extract first chain from our list
-temp <- comb_out[[1]]
-
-# Take out just the chain corresponding to bFacGibbs
-bFacGibbs <- as.data.frame(temp$chains$bFacGibbs)
-# Make a new column specifying the chain
-# This will be used to remove burnin and for plotting
-bFacGibbs$chain <- rep(1, length = niter)
-# Make a new column specifying the iteration
-# This will be used to remove burnin and for plotting
-bFacGibbs$iter <- as.numeric(rownames(bFacGibbs))
-# Insert this into our combined matrix
-comb_bFacGibbs <- bFacGibbs
-
-# Same with bgibbs
-bgibbs <- as.data.frame(temp$chains$bgibbs)
-bgibbs$chain <- rep(1, length = niter)
-bgibbs$iter <- as.numeric(rownames(bgibbs))
-comb_bgibbs <- bgibbs
-
-# gibbsUn
-bgibbsUn <- as.data.frame(temp$chains$bgibbsUn)
-bgibbsUn$chain <- rep(1, length = niter)
-bgibbsUn$iter <- as.numeric(rownames(bgibbsUn))
-comb_bgibbsUn <- bgibbsUn
-
-# fSensGibbs
-fSensGibbs <- as.data.frame(temp$chains$fSensGibbs)
-fSensGibbs$chain <- rep(1, length = niter)
-fSensGibbs$iter <- as.numeric(rownames(fSensGibbs))
-comb_fSensGibbs <- fSensGibbs
-
-# sgibbs
-sgibbs <- as.data.frame(temp$chains$sgibbs)
-sgibbs$chain <- rep(1, length = niter)
-sgibbs$iter <- as.numeric(rownames(sgibbs))
-comb_sgibbs <- sgibbs
-
-# Repeat for all chains after chain 1
-for(i in 2:nchains){
-  # bFacGibbs
-  temp <- comb_out[[i]]
-  bFacGibbs <- as.data.frame(temp$chains$bFacGibbs)
-  bFacGibbs$chain <- rep(i, length = niter)
-  bFacGibbs$iter <- as.numeric(rownames(bFacGibbs))
-  comb_bFacGibbs <- rbind(comb_bFacGibbs, bFacGibbs)
-  
-  # bgibbs
-  bgibbs <- as.data.frame(temp$chains$bgibbs)
-  bgibbs$chain <- rep(i, length = niter)
-  bgibbs$iter <- as.numeric(rownames(bgibbs))
-  comb_bgibbs <- rbind(comb_bgibbs, bgibbs)
-  
-  # bgibbsUn
-  bgibbsUn <- as.data.frame(temp$chains$bgibbsUn)
-  bgibbsUn$chain <- rep(i, length = niter)
-  bgibbsUn$iter <- as.numeric(rownames(bgibbsUn))
-  comb_bgibbsUn <- rbind(comb_bgibbsUn, bgibbsUn)
-  
-  # fSensGibbs
-  fSensGibbs <- as.data.frame(temp$chains$fSensGibbs)
-  fSensGibbs$chain <- rep(i, length = niter)
-  fSensGibbs$iter <- as.numeric(rownames(fSensGibbs))
-  comb_fSensGibbs <- rbind(comb_fSensGibbs, fSensGibbs)
-  
-  # sgibbs
-  sgibbs <- as.data.frame(temp$chains$sgibbs)
-  sgibbs$chain <- rep(i, length = niter)
-  sgibbs$iter <- as.numeric(rownames(sgibbs))
-  comb_sgibbs <- rbind(comb_sgibbs, sgibbs)
-}
+# Add chain and iteration indices to dataframes
+# for plotting and manipulating later
+bFacGibbs$chain <- bgibbs$chain <- bgibbsUn$chain <- fSensGibbs$chain <- sgibbs$chain <- rep(1:nchains, each = niter)
+bFacGibbs$iter <- bgibbs$iter <- bgibbsUn$iter <- fSensGibbs$iter <- sgibbs$iter <- seq(from = 1, to = niter, by = 1)
 
 # Remove burn in
 
@@ -121,23 +71,13 @@ for(i in 2:nchains){
 burnin <- 200
 
 # Remove burn in
-bFacGibbs <- comb_bFacGibbs |>
-  dplyr::filter(iter > burnin)
+bFacGibbs <- filter(bFacGibbs, iter > burnin)
+bgibbs <- filter(bgibbs, iter > burnin)
+bgibbsUn <- filter(bgibbsUn, iter > burnin)
+fSensGibbs <- filter(fSensGibbs, iter > burnin)
+sgibbs <- filter(sgibbs, iter > burnin)
 
-bgibbs <- comb_bgibbs |>
-  dplyr::filter(iter > burnin)
-
-bgibbsUn <- comb_bgibbsUn |>
-  dplyr::filter(iter > burnin)
-
-fSensGibbs <- comb_fSensGibbs |>
-  dplyr::filter(iter > burnin)
-
-sgibbs <- comb_sgibbs |>
-  dplyr::filter(iter > burnin)
-
-# Now we're ready to plot our chains
-
+# Trace plots
 bFacGibbs |>
   select(c(colnames(bFacGibbs)[1:20], iter, chain)) |>
   pivot_longer(colnames(bFacGibbs)[1:20],
@@ -306,6 +246,7 @@ bFacGibbs |>
   theme_minimal() +
   scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 
+# Calculate gelman rubin diagnostic
 bFacGibbs_diag <- c()
 
 for(i in 1:(ncol(bFacGibbs)-2)){
@@ -316,8 +257,10 @@ bFacGibbs_diag <- as.data.frame(cbind(colnames(bFacGibbs)[1:(ncol(bFacGibbs)-2)]
 
 colnames(bFacGibbs_diag) <- c('Coefficient', 'Diagnostic Statistic')
 
+# If < ~1.2, indicates chain convergence
 print(tibble(bFacGibbs_diag), n = nrow(bFacGibbs_diag))
 
+# Repeat for bgibbs
 bgibbs |>
   select(c(colnames(bgibbs)[1:20], iter, chain)) |>
   pivot_longer(colnames(bgibbs)[1:20],
@@ -474,6 +417,7 @@ colnames(bgibbs_diag) <- c('Coefficient', 'Diagnostic Statistic')
 
 print(tibble(bgibbs_diag), n = nrow(bgibbs_diag))
 
+# Repeat for bgibbsUn
 bgibbsUn |>
   select(c(colnames(bgibbsUn)[1:20], iter, chain)) |>
   pivot_longer(colnames(bgibbsUn)[1:20],
@@ -735,7 +679,7 @@ print(tibble(sgibbs_diag), n = nrow(sgibbs_diag))
 
 # If everything looks good, save
 
-save(comb_out, bFacGibbs, bgibbs, bgibbsUn,
-     fSensGibbs, sgibbs, file = paste0('out/FINAL_RUNS/', type, '/combined.RData'))
+save(bFacGibbs, bgibbs, bgibbsUn,
+     fSensGibbs, sgibbs, file = paste0('out/', type, '/combined.RData'))
 
      
