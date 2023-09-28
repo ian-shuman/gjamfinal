@@ -10,37 +10,60 @@ library(lme4)
 library(gjam)
 
 # Load output from GJAM
-#load('out/FINAL_RUNS/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
-#load('out/FINAL_RUNS/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
-#load('out/FINAL_RUNS/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
-load('out/FINAL_RUNS/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
+#load('out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
+load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
+#load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
+#load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-#load('GJAMDATA/Withheld For Validation/validation_process2.RData')
-load('GJAMDATA/Withheld For Validation/validation_process_reduce.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 
 # Specify whether all taxa or reduced taxa
-type <- 'reduced'
+type <- 'all'
 
-#xdata <- xdata |> mutate(Aspect = 1)
-xdata <- xdata |> select(-Aspect, -type)
+# Take out  columns that will unnecessarily mess up gjamPredict
+xdata <- xdata_oos |> select(-Aspect, -type)
 
-cond_pred <- matrix(, nrow = nrow(ydata), ncol = ncol(ydata))
-cond_prob <- matrix(, nrow = nrow(ydata), ncol = ncol(ydata))
+# Three ecosystem types
+if(type == 'reduced'){
+  names <- c('Prairie', 'Forest', 'Savanna')
+}
+if(type == 'all'){
+  names <- c('Elm', 'Oak', 'Maple', 'Ash', 'Hickory', 'No.tree',
+             'Walnut', 'Basswood', 'Ironwood', 'Beech', 'Dogwood',
+             'Poplar.tulip.poplar', 'Black.gum.sweet.gum', 'Other.conifer',
+             'Other.hardwood')
+}
 
-for(s in 1:ncol(ydata)){
-  new_ydata <- ydata[,-s]
+# Storage
+cond_pred <- matrix(, nrow = nrow(ydata_oos), ncol = ncol(ydata_oos))
+cond_prob <- matrix(, nrow = nrow(ydata_oos), ncol = ncol(ydata_oos))
+# Column names for saving specific rows from names object
+colnames(cond_pred) <- colnames(cond_prob) <- names
+
+# For each taxon/ecosystem type
+for(s in 1:ncol(ydata_oos)){
+  # Remove one taxon/ecosystem type
+  notin <- names[s]
+  # Keep all the others
+  yesin <- names[-s]
+  # Remove from ydata
+  new_ydata <- ydata_oos[,yesin]
+  # Make new data list for gjamPredict function
   new_datalist <- list(ydataCond = new_ydata,
                        xdata = xdata,
                        nsim = 1000)
-  cond_pred_temp <- gjamPredict(output = out, 
+  # Make prediction
+  cond_pred_temp <- gjamPredict(output = out,
                                 newdata = new_datalist)
-  cond_pred[,s] <- cond_pred_temp$sdList$yMu[,s]
-  cond_prob[,s] <- cond_pred_temp$prPresent[,s]
-  print(s/ncol(ydata))
+  # Save presence/absence
+  cond_pred[,notin] <- cond_pred_temp$sdList$yMu[,notin]
+  # Save probability of presence
+  cond_prob[,notin] <- cond_pred_temp$prPresent[,notin]
 }
 
 if(type == 'all'){
@@ -57,7 +80,7 @@ if(type == 'reduced'){
   load('out/cond_pred_reduced_taxa.RData')
 }
 
-colnames(cond_pred) <- colnames(cond_prob) <- colnames(ydata)
+colnames(cond_pred) <- colnames(cond_prob) <- colnames(ydata_oos)
 
 cond_pred <- cbind(cond_pred, xdata$long, xdata$lat)
 cond_prob <- cbind(cond_prob, xdata$long, xdata$lat)
@@ -78,18 +101,26 @@ states <- map_data('state', region = c('illinois', 'indiana'))
 
 if(type == 'all'){
   cond_pred |>
-    pivot_longer(No.tree:Other.hardwood,
+    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood, Ironwood,
+                   Beech, Dogwood, Poplar.tulip.poplar, Black.gum.sweet.gum, Other.conifer,
+                   Other.hardwood),
                  names_to = 'Taxon',
                  values_to = 'Predicted') |>
     mutate(Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon),
-           Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-          Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon)) |>
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon),
+           Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
+          Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon)) |>
     ggplot(aes(x = long, y = lat, color = Predicted)) +
     geom_point() +
     geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    facet_wrap(~Taxon, nrow = 3, ncol = 5) +
+    facet_wrap(~factor(Taxon, levels = c('No tree',
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum', 'Dogwood',
+                                         'Elm', 'Ironwood', 'Maple',
+                                         'Other conifer', 'Other hardwood',
+                                         'Poplar/tulip poplar', 'Walnut')), nrow = 3, ncol = 5) +
     theme_void() +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
@@ -98,18 +129,27 @@ if(type == 'all'){
     xlab('') + ylab('')
 
   cond_prob |>
-    pivot_longer(No.tree:Other.hardwood,
+    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood, Ironwood,
+                   Beech, Dogwood, Poplar.tulip.poplar, Black.gum.sweet.gum, Other.conifer,
+                   Other.hardwood),
                  names_to = 'Taxon',
                  values_to = 'Probability') |>
-    mutate(Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon),
-           Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-          Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon)) |>
+    mutate(Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon),
+           Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
+          Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon)) |>
     ggplot(aes(x = long, y = lat, color = Probability)) +
     geom_point() +
     geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    facet_wrap(~Taxon, nrow = 3, ncol = 5) +
+    facet_wrap(~factor(Taxon, levels = c('No tree', 
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum',
+                                         'Dogwood', 'Elm', 'Ironwood',
+                                         'Maple', 'Other conifer',
+                                         'Other hardwood', 'Poplar/tulip poplar',
+                                         'Walnut')), nrow = 3, ncol = 5) +
     theme_void() +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
@@ -119,7 +159,7 @@ if(type == 'all'){
 }
 if(type == 'reduced'){
   cond_pred |>
-    pivot_longer(Prairie:Savanna,
+    pivot_longer(c(Prairie, Forest, Savanna),
                  names_to = 'Ecosystem',
                  values_to = 'Predicted') |>
     ggplot(aes(x = long, y = lat, color = Predicted)) +
@@ -151,11 +191,17 @@ if(type == 'reduced'){
 
 if(type == 'all'){
   pred2_yMu <- cond_pred |>
-    mutate(Index = rownames(ydata)) |>
-    pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Presence')
-  ydata2 <- ydata |>
+    mutate(Index = rownames(ydata_oos)) |>
+    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood,
+                   Ironwood, Beech, Dogwood, Poplar.tulip.poplar,
+                   Black.gum.sweet.gum, Other.conifer, Other.hardwood),
+                 names_to = 'Taxon', values_to = 'Presence')
+  ydata2 <- ydata_oos |>
     rownames_to_column(var = 'Index') |>
-    pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Presence')
+    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood,
+                   Ironwood, Beech, Dogwood, Poplar.tulip.poplar,
+                   Black.gum.sweet.gum, Other.conifer, Other.hardwood),
+                 names_to = 'Taxon', values_to = 'Presence')
 }
 if(type == 'reduced'){
   pred2_yMu <- cond_pred |>
@@ -181,14 +227,21 @@ if(type == 'reduced'){
 
 if(type == 'all'){
   comp |>
-    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-           Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
+           Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
+           Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon),
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon)) |>
     ggplot(aes(x = Predicted, y = Observed)) +
     geom_point() +
-    facet_wrap(~Taxon, nrow = 3, ncol = 5) +
+    facet_wrap(~factor(Taxon, levels = c('No tree',
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum', 'Dogwood',
+                                         'Elm', 'Ironwood', 'Maple',
+                                         'Other conifer', 'Other hardwood',
+                                         'Poplar/tulip poplar', 'Walnut')),
+               nrow = 3, ncol = 5) +
     geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
                 color = 'maroon', fill = 'maroon') +
     theme_minimal() +
@@ -211,14 +264,20 @@ if(type == 'reduced'){
 
 if(type == 'all'){
   comp |>
-    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-           Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
+           Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
+           Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon),
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon)) |>
     ggplot(aes(x = Predicted, y = Observed)) +
     geom_point() +
-    facet_wrap(~Taxon, nrow = 3, ncol = 5) +
+    facet_wrap(~factor(Taxon, levels = c('No tree',
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum', 'Dogwood',
+                                         'Elm', 'Ironwood', 'Maple',
+                                         'Other conifer', 'Other hardwood',
+                                         'Poplar/tulip poplar', 'Walnut')), nrow = 3, ncol = 5) +
     geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
                 color = 'maroon', fill = 'maroon') +
     theme_minimal() +
