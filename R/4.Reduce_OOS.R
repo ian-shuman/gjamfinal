@@ -8,7 +8,7 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-load('GJAMDATA/Withheld For Validation/validation_process_fixmarea.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea.RData')
 
 new.ydata <- ydata_oos |>
   # Make a combined "tulip poplar column"
@@ -60,4 +60,4 @@ zeros <- which(zeros == 0)
 # Looks like we're good!
 ydata_oos <- new.ydata
 
-save(xdata_oos, ydata_oos, file = 'GJAMDATA/validation_process2_fixmarea.RData')
+save(xdata_oos, ydata_oos, file = 'GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')

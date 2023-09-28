@@ -6,10 +6,10 @@ rm(list = ls())
 
 library(dplyr)
 
-load('GJAMDATA/Withheld For Validation/validation_process2.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
 
 # Convert to ecosystems as in 3.Reduce_ecosystem.R
-ydata <- ydata |>
+ydata_oos <- ydata_oos |>
   mutate(Prairie = No.tree,
          Savanna = Oak + Hickory,
          Forest = Elm + Ash + Maple + Basswood + Walnut + Black.gum.sweet.gum +
@@ -23,4 +23,4 @@ ydata <- ydata |>
   select(c(Prairie, Forest, Savanna)) |>
   mutate(Savanna = if_else(Savanna == 1 & Forest == 1, 0, Savanna))
 
-save(xdata, ydata, file = 'GJAMDATA/Withheld For Validation/validation_process2_ecosystem.RData')
+save(xdata_oos, ydata_oos, file = 'GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
