@@ -8,7 +8,7 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-load('GJAMDATA/process_FINALSOILS.RData')
+load('GJAMDATA/processed_xydata.RData')
 
 # Make into a more usable format
 longydata <- ydata |>
@@ -150,5 +150,5 @@ zeros <- which(zeros == 0)
 ydata <- new.ydata
 
 # I'm going to save this in a different object for now
-save(xdata, ydata, file = 'GJAMDATA/process2_FINALSOILS.RData')
+save(xdata, ydata, file = 'GJAMDATA/processed_xydata_2.RData')
 
