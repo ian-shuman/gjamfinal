@@ -24,4 +24,6 @@ Graphs_2.R: This script produces the figures used in Shuman et al. (in prep) for
 
 Graphs_2_ecosystem.R: This script produces the figures used in Shuman et al. (in prep) for the ecosystem-level model runs.
 
+SummaryFigures.R: This script produces the figures given in the supplement of Shuman et al. (in prep) which summarize the response and driver variables in space
+
 utils.R: This script contains utility functions for the code. Specifically, there is a function for manually calculating the Gelman Rubin diagnostic for assessing chain convergence because our output is not in the proper format to use the default functions available in R. I additionally added resampling of the chains in this function to account for the fact that some chains appear to be identical in our output. Specifically, I resampled 20 the 4 chains 20 times and calculated the Gelman Rubin diagnostic on each of the resampled chain configurations. Then, I took the maximum diagnostic statistic, so that artificially low Rhat is likely to be removed at least once in 20 different configurations.
