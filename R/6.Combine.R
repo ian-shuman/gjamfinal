@@ -1,5 +1,10 @@
 ## Combine output from multiple independent runs (= chains) of GJAM
 
+## NOTE: All code will run with any of the 4 model choices. The only
+## difference is the indexing for making traceplots. Each model
+## has a different number of paramters, so the index must be changed
+## once an error is thrown to see the last few columns of parameters.
+
 ## Author: AM Willson
 
 rm(list = ls())
@@ -18,7 +23,7 @@ source('R/utils.R')
   # Reduced_taxa~all_cov_ASPECT
   # Reduced_taxa~all_cov_NOASPECT
 
-type <- 'Reduced_taxa~all_cov_NOASPECT'
+type <- 'All_taxa~all_cov_NOASPECT'
 
 # List all the outputs we have for that model
 files <- list.files(path = paste0('out/', type))
