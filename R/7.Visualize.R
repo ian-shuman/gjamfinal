@@ -285,7 +285,7 @@ if(type == 'reduced'){
     xlab('') + ylab(expression(paste('Sensitivity (',hat(F),')'))) +
     theme_minimal() +
     scale_color_manual(values = c('#88ccee', # precipitation - climate
-                                  '#aa4499', # floodplain - topography
+                                  '#999932', # floodplain - topography
                                   '#88ccee', # temperature - climate
                                   '#999932', # hydric soil - soil
                                   '#999932', # caco3 - soil
