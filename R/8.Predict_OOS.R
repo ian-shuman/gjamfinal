@@ -23,7 +23,7 @@ load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
 rm(edata, mlist, xdata, ydata, site_effort, form1, nburn, niter)
 
 # Load out of sample data
-load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 
 # Specify whether all taxa or reduced taxa

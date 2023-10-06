@@ -11,19 +11,19 @@ library(gjam)
 
 # Load output from GJAM
 #load('out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
-load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
+#load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
 #load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
-#load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
+load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
-#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 
 # Specify whether all taxa or reduced taxa
-type <- 'all'
+type <- 'reduced'
 
 # Take out  columns that will unnecessarily mess up gjamPredict
 xdata <- xdata_oos |> select(-Aspect, -type)
