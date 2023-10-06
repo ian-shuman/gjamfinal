@@ -205,9 +205,9 @@ if(type == 'all'){
 }
 if(type == 'reduced'){
   pred2_yMu <- cond_pred |>
-    mutate(Index = rownames(ydata)) |>
+    mutate(Index = rownames(ydata_oos)) |>
     pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
-  ydata2 <- ydata |>
+  ydata2 <- ydata_oos |>
     rownames_to_column(var = 'Index') |>
     pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
 }
