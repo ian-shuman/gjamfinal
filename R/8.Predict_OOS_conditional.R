@@ -122,6 +122,7 @@ if(type == 'all'){
                                          'Other conifer', 'Other hardwood',
                                          'Poplar/tulip poplar', 'Walnut')), nrow = 3, ncol = 5) +
     theme_void() +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
           legend.text = element_text(size = 12)) +
@@ -151,6 +152,7 @@ if(type == 'all'){
                                          'Other hardwood', 'Poplar/tulip poplar',
                                          'Walnut')), nrow = 3, ncol = 5) +
     theme_void() +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
           legend.text = element_text(size = 12)) +
@@ -167,6 +169,7 @@ if(type == 'reduced'){
     geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
     facet_wrap(~Ecosystem) +
     theme_void() +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
           legend.text = element_text(size = 12)) +
@@ -182,6 +185,7 @@ if(type == 'reduced'){
     geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
     facet_wrap(~Ecosystem) +
     theme_void() +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
           legend.text = element_text(size = 12)) +

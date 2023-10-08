@@ -60,7 +60,7 @@ ydata_eco_comb |>
   labs(color = 'Ecosystem State') +
   guides(color = guide_legend(override.aes = list(shape = 16, size = 7))) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme_void() +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
@@ -91,7 +91,7 @@ ydata_all_comb |>
                                               'Other hardwood', 'Poplar/tulip poplar', 
                                               'Walnut')) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme_void() +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
@@ -107,7 +107,7 @@ slope <- xdata |>
   scale_color_gradient(low = 'White', high = 'black', 'Slope (°)') +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -123,7 +123,7 @@ aspect <- xdata |>
   scale_color_manual(values = c('red', 'yellow', 'darkgreen', 'blue', 'grey')) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -137,7 +137,7 @@ swi <- xdata |>
   scale_color_viridis(option = 'viridis', direction = -1, str_wrap('SAGA Wetness Index', width = 10)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -154,7 +154,7 @@ CAC <- xdata |>
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   labs(color = expression(paste(CaCO['3'], ' (%)'))) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -168,7 +168,7 @@ CEC <- xdata |>
   scale_color_viridis(option = 'viridis', direction = -1, str_wrap('Cation exchange capacity (meq/100g)', width = 14)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -182,7 +182,7 @@ cla <- xdata |>
   scale_color_viridis(option = 'viridis', direction = -1, '% clay', limits = c(0, 100)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -196,7 +196,7 @@ san <- xdata |>
   scale_color_viridis(option = 'viridis', direction = -1, '% sand', limits = c(0, 100)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -210,7 +210,7 @@ AWC <- xdata |>
   scale_color_viridis(option = 'viridis', direction = -1, str_wrap('Available water content (cm/cm)', width = 14)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -225,7 +225,7 @@ hydric <- xdata |>
   scale_fill_manual(values = 'black') +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -240,7 +240,7 @@ flood <- xdata |>
   scale_fill_manual(values = 'black') +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -258,7 +258,7 @@ precip <- xdata |>
   scale_color_distiller(palette = 'Blues', direction = 1, str_wrap('Mean annual precipitation 1895 - 1925 (mm)', width = 14)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
@@ -272,7 +272,7 @@ temp <- xdata |>
   scale_color_viridis(option = 'magma', str_wrap('Mean annual temperature 1895 - 1925 (°C)', width = 14)) +
   geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   theme_void() +
-  coord_fixed() +
+  coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   theme(plot.title = element_text(size = 16, face = 'bold', hjust = 0.5),
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12)) +
