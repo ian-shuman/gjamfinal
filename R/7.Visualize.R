@@ -371,4 +371,4 @@ colnames(upp_mat) <- rownames(upp_mat) <- colnames(corr_mat)
 # Figure 5 & Figure S10
 # Plot with uncertainty
 corrplot(corr_mat, lowCI.mat = low_mat, uppCI.mat = upp_mat, plotCI = 'circle',
-         diag = F, type = 'upper', col = rev(pal), tl.col = 'black')
+         diag = F, type = 'upper', col = rev(pal), tl.col = 'black', tl.cex = 1.4)

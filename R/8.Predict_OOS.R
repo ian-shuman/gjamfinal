@@ -54,8 +54,6 @@ states <- map_data('state') |>
   filter(region %in% c('indiana', 'illinois'))
 
 ## yMu = predicted y (presence/absence but for some reason on a continuous scale)
-# I think it's on a continuous scale because it's the average across different iterations that
-# can be 0 or 1
 if(type == 'all'){
   # Add the coordinates from the xdata
   pred_yMu |>
@@ -338,4 +336,55 @@ if(type == 'reduced'){
   
   form_forest <- glm(Observed ~ Probability, family = binomial, data = comp_forest)
   print(paste('forest:', with(summary(form_forest), 1 - deviance/null.deviance)))
+}
+
+# Difference between probability of presence and observed presence/absence over space
+if(type == 'all'){
+  xdata <- xdata |>
+    rownames_to_column(var = 'Index')
+  comp <- comp |>
+    left_join(xdata, by = 'Index') |>
+    select(c('Taxon', 'Probability', 'Predicted', 'Observed', 'lat', 'long'))
+  
+  # Color interpretation:
+  # near 0 (white) = probability nearly matches observation
+  # near 1 (red) = high probability of presence when absent
+  # near -1 (blue) = high probability of absence when present
+  comp |>
+    mutate(difference = Observed - Probability) |>
+    ggplot(aes(x = long, y = lat, color = difference)) +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    geom_point(alpha = 0.7) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    facet_wrap(~Taxon) +
+    scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12))
+}
+
+if(type == 'reduced'){
+  xdata <- xdata |>
+    rownames_to_column(var = 'Index')
+  comp <- comp |>
+    left_join(xdata, by = 'Index') |>
+    select(c('Ecosystem', 'Probability', 'Predicted', 'Observed', 'lat', 'long'))
+  
+  # Color interpretation:
+  # near 0 (white) = probability nearly matches observation
+  # near 1 (red)= high probability of presence when absent
+  # near -1 (blue) = high probability of absence when present
+  comp |>
+    mutate(difference = Observed - Probability) |>
+    ggplot(aes(x = long, y = lat, color = difference)) +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    geom_point(alpha = 0.7) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    facet_wrap(~Ecosystem) +
+    scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12))
 }

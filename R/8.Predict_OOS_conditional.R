@@ -8,22 +8,23 @@ library(tidyr)
 library(tibble)
 library(lme4)
 library(gjam)
+library(piecewiseSEM)
 
 # Load output from GJAM
 #load('out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
-#load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
+load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
 #load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
-load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
+#load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
-load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 
 # Specify whether all taxa or reduced taxa
-type <- 'reduced'
+type <- 'all'
 
 # Take out  columns that will unnecessarily mess up gjamPredict
 xdata <- xdata_oos |> select(-Aspect, -type)
@@ -66,6 +67,7 @@ for(s in 1:ncol(ydata_oos)){
   cond_prob[,notin] <- cond_pred_temp$prPresent[,notin]
 }
 
+# Save so that this does not need to be run every time to produce figures
 if(type == 'all'){
   save(cond_pred, cond_prob, file = 'out/cond_pred_all_taxa.RData')
 }
@@ -73,6 +75,7 @@ if(type == 'reduced'){
   save(cond_pred, cond_prob, file = 'out/cond_pred_reduced_taxa.RData')
 }
 
+# Load if you've already run above
 if(type == 'all'){
   load('out/cond_pred_all_taxa.RData')
 }
@@ -80,242 +83,346 @@ if(type == 'reduced'){
   load('out/cond_pred_reduced_taxa.RData')
 }
 
-colnames(cond_pred) <- colnames(cond_prob) <- colnames(ydata_oos)
+# Format predictions
+pred_yMu <- as.data.frame(cond_pred)
+pred_pr <- as.data.frame(cond_prob)
 
-cond_pred <- cbind(cond_pred, xdata$long, xdata$lat)
-cond_prob <- cbind(cond_prob, xdata$long, xdata$lat)
+# Map of study region
+states <- map_data('state') |>
+  filter(region %in% c('indiana', 'illinois'))
 
+## yMu = predicted y (presence/absence but for some reason on a continuous scale)
 if(type == 'all'){
-  colnames(cond_pred)[16:17] <- c('long', 'lat')
-  colnames(cond_prob)[16:17] <- c('long', 'lat')
-}
-if(type == 'reduced'){
-  colnames(cond_pred)[4:5] <- c('long', 'lat')
-  colnames(cond_prob)[4:5] <- c('long', 'lat')
-}
-
-cond_pred <- as.data.frame(cond_pred)
-cond_prob <- as.data.frame(cond_prob)
-
-states <- map_data('state', region = c('illinois', 'indiana'))
-
-if(type == 'all'){
-  cond_pred |>
-    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood, Ironwood,
-                   Beech, Dogwood, Poplar.tulip.poplar, Black.gum.sweet.gum, Other.conifer,
-                   Other.hardwood),
-                 names_to = 'Taxon',
-                 values_to = 'Predicted') |>
-    mutate(Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon),
-           Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
-          Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon)) |>
-    ggplot(aes(x = long, y = lat, color = Predicted)) +
-    geom_point() +
+  # add the coordinates from the xdata
+  pred_yMu |>
+    mutate(lat = xdata$lat,
+           lon = xdata$long) |>
+    # Make easier to plot
+    pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Presence') |>
+    # Make taxon names easier to read
+    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
+           Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+           Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+    # Plot presence over space
+    ggplot() +
     geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    facet_wrap(~factor(Taxon, levels = c('No tree',
-                                         'Hickory', 'Oak',
-                                         'Ash', 'Basswood', 'Beech',
-                                         'Black gum/sweet gum', 'Dogwood',
-                                         'Elm', 'Ironwood', 'Maple',
-                                         'Other conifer', 'Other hardwood',
-                                         'Poplar/tulip poplar', 'Walnut')), nrow = 3, ncol = 5) +
-    theme_void() +
     coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Presence)) +
+    facet_wrap(~Taxon, nrow = 3, ncol = 5) +
+    scale_color_viridis_c(option = 'A') +
+    theme_void() +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
-          legend.text = element_text(size = 12)) +
-    scale_color_viridis_c(option = 'A') +
-    xlab('') + ylab('')
-
-  cond_prob |>
-    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood, Ironwood,
-                   Beech, Dogwood, Poplar.tulip.poplar, Black.gum.sweet.gum, Other.conifer,
-                   Other.hardwood),
-                 names_to = 'Taxon',
-                 values_to = 'Probability') |>
-    mutate(Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon),
-           Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
-          Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon)) |>
-    ggplot(aes(x = long, y = lat, color = Probability)) +
-    geom_point() +
-    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    facet_wrap(~factor(Taxon, levels = c('No tree', 
-                                         'Hickory', 'Oak',
-                                         'Ash', 'Basswood', 'Beech',
-                                         'Black gum/sweet gum',
-                                         'Dogwood', 'Elm', 'Ironwood',
-                                         'Maple', 'Other conifer',
-                                         'Other hardwood', 'Poplar/tulip poplar',
-                                         'Walnut')), nrow = 3, ncol = 5) +
-    theme_void() +
-    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
-    theme(strip.text = element_text(size = 14, face = 'bold'),
-          legend.title = element_text(size = 14),
-          legend.text = element_text(size = 12)) +
-    scale_color_viridis_c(option = 'A') +
-    xlab('') + ylab('')
+          legend.text = element_text(size = 12))
 }
+# Same procedure if reduced
 if(type == 'reduced'){
-  cond_pred |>
-    pivot_longer(c(Prairie, Forest, Savanna),
-                 names_to = 'Ecosystem',
-                 values_to = 'Predicted') |>
-    ggplot(aes(x = long, y = lat, color = Predicted)) +
-    geom_point() +
+  pred_yMu |>
+    mutate(lat = xdata$lat,
+           lon = xdata$long) |>
+    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence') |>
+    ggplot() +
     geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Presence)) +
     facet_wrap(~Ecosystem) +
+    scale_color_viridis_c(option = 'A') +
     theme_void() +
-    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
-          legend.text = element_text(size = 12)) +
+          legend.text = element_text(size = 12))
+}
+
+# Do the same with the probability of presence
+## This actually represents the probability of presence at a given location
+if(type == 'all'){
+  pred_pr |>
+    mutate(lat = xdata$lat,
+           lon = xdata$lon) |>
+    pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Probability') |>
+    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
+           Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+           Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+    ggplot() +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Probability)) +
+    facet_wrap(~Taxon, nrow = 3, ncol = 5) +
     scale_color_viridis_c(option = 'A') +
-    xlab('') + ylab('')
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12))
+}
+if(type == 'reduced'){
+  pred_pr |>
+    mutate(lat = xdata$lat,
+           lon = xdata$lon) |>
+    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Probability') |>
+    ggplot() +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Probability)) +
+    facet_wrap(~Ecosystem) +
+    scale_color_viridis_c(option = 'A') +
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12))
+}
+
+# Now compare with observation
+if(type == 'all'){
+  pred_yMu_long <- pred_yMu |>
+    # Add index of each corner in each management area from ydata
+    mutate(Index = rownames(ydata_oos)) |>
+    pivot_longer(Elm:Other.hardwood, names_to = 'Taxon', values_to = 'Presence')
+  # Do the same for ydata
+  ydata_oos_long <- ydata_oos |>
+    rownames_to_column(var = 'Index') |>
+    pivot_longer(Elm:Other.hardwood, names_to = 'Taxon', values_to = 'Presence')
+}
+if(type == 'reduced'){
+  pred_yMu_long <- pred_yMu |>
+    mutate(Index = rownames(ydata_oos)) |>
+    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
+  ydata_oos_long <- ydata_oos |>
+    rownames_to_column(var = 'Index') |>
+    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
+}
+
+if(type == 'all'){
+  # Join predicted and observed for predicted presence
+  comp_1 <- pred_yMu_long |>
+    full_join(ydata_oos_long, by = c('Index', 'Taxon'))
+  colnames(comp_1) <- c('Index', 'Taxon', 'Predicted', 'Observed')
+}
+if(type == 'reduced'){
+  comp_1 <- pred_yMu_long |>
+    full_join(ydata_oos_long, by = c('Index', 'Ecosystem'))
+  colnames(comp_1) <- c('Index', 'Ecosystem', 'Predicted', 'Observed')
+}
+
+if(type == 'all'){
+  # do the same for predicted probability of presence
+  pred_pr_long <- pred_pr |>
+    mutate(Index = rownames(ydata_oos)) |>
+    pivot_longer(Elm:Other.hardwood, names_to = 'Taxon', values_to = 'Probability')
   
-  cond_prob |>
-    pivot_longer(Prairie:Savanna,
-                 names_to = 'Ecosystem',
-                 values_to = 'Probability') |>
-    ggplot(aes(x = long, y = lat, color = Probability)) +
-    geom_point() +
-    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    facet_wrap(~Ecosystem) +
-    theme_void() +
-    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
-    theme(strip.text = element_text(size = 14, face = 'bold'),
-          legend.title = element_text(size = 14),
-          legend.text = element_text(size = 12)) +
-    scale_color_viridis_c(option = 'A') +
-    xlab('') + ylab('')
+  comp <- pred_pr_long |>
+    full_join(comp_1, by = c('Index', 'Taxon'))
 }
 
-if(type == 'all'){
-  pred2_yMu <- cond_pred |>
+if(type == 'reduced'){
+  pred_pr_long <- pred_pr |>
     mutate(Index = rownames(ydata_oos)) |>
-    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood,
-                   Ironwood, Beech, Dogwood, Poplar.tulip.poplar,
-                   Black.gum.sweet.gum, Other.conifer, Other.hardwood),
-                 names_to = 'Taxon', values_to = 'Presence')
-  ydata2 <- ydata_oos |>
-    rownames_to_column(var = 'Index') |>
-    pivot_longer(c(Elm, Oak, Maple, Ash, Hickory, No.tree, Walnut, Basswood,
-                   Ironwood, Beech, Dogwood, Poplar.tulip.poplar,
-                   Black.gum.sweet.gum, Other.conifer, Other.hardwood),
-                 names_to = 'Taxon', values_to = 'Presence')
-}
-if(type == 'reduced'){
-  pred2_yMu <- cond_pred |>
-    mutate(Index = rownames(ydata_oos)) |>
-    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
-  ydata2 <- ydata_oos |>
-    rownames_to_column(var = 'Index') |>
-    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
-}
-
-if(type == 'all'){
-  comp <- pred2_yMu |>
-    full_join(ydata2, by = c('Index', 'Taxon')) |>
-    select(-long,-lat)
-  colnames(comp) <- c('Index', 'Taxon', 'Predicted', 'Observed')
-}
-if(type == 'reduced'){
-  comp <- pred2_yMu |>
-    full_join(ydata2, by = c('Index', 'Ecosystem')) |>
-    select(-long, -lat)
-  colnames(comp) <- c('Index', 'Ecosystem', 'Predicted', 'Observed')
+    pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Probability')
+  
+  comp <- pred_pr_long |>
+    full_join(comp_1, by = c('Index', 'Ecosystem'))
 }
 
 if(type == 'all'){
   comp |>
-    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
-           Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
-           Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon)) |>
-    ggplot(aes(x = Predicted, y = Observed)) +
+    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
+           Taxon = if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+           Taxon = if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+           Taxon = if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+    ggplot(aes(x = Probability, y = Observed)) +
     geom_point() +
-    facet_wrap(~factor(Taxon, levels = c('No tree',
-                                         'Hickory', 'Oak',
-                                         'Ash', 'Basswood', 'Beech',
-                                         'Black gum/sweet gum', 'Dogwood',
-                                         'Elm', 'Ironwood', 'Maple',
-                                         'Other conifer', 'Other hardwood',
-                                         'Poplar/tulip poplar', 'Walnut')),
-               nrow = 3, ncol = 5) +
+    facet_wrap(~Taxon, scales = 'free', nrow = 3, ncol = 5) +
     geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
                 color = 'maroon', fill = 'maroon') +
-    theme_minimal() +
-    theme(strip.text = element_text(size = 14, face = 'bold'),
-          axis.title = element_text(size = 14),
-          axis.text = element_text(size = 12))
-}
-if(type == 'reduced'){
-  comp |>
-    ggplot(aes(x = Predicted, y = Observed)) +
-    geom_point() +
-    facet_wrap(~Ecosystem) +
-    geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
-                color = 'maroon', fill = 'maroon') +
+    xlab('Predicted') + ylab('Observed') +
     theme_minimal() +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           axis.title = element_text(size = 14),
           axis.text = element_text(size = 12))
 }
 
-if(type == 'all'){
-  comp |>
-    mutate(Taxon = if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
-           Taxon = if_else(Taxon == 'No.tree', 'No tree', Taxon),
-           Taxon = if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
-           Taxon = if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon),
-           Taxon = if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon)) |>
-    ggplot(aes(x = Predicted, y = Observed)) +
-    geom_point() +
-    facet_wrap(~factor(Taxon, levels = c('No tree',
-                                         'Hickory', 'Oak',
-                                         'Ash', 'Basswood', 'Beech',
-                                         'Black gum/sweet gum', 'Dogwood',
-                                         'Elm', 'Ironwood', 'Maple',
-                                         'Other conifer', 'Other hardwood',
-                                         'Poplar/tulip poplar', 'Walnut')), nrow = 3, ncol = 5) +
-    geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
-                color = 'maroon', fill = 'maroon') +
-    theme_minimal() +
-    theme(strip.text = element_text(size = 14, face = 'bold'),
-          axis.title = element_text(size = 14),
-          axis.text = element_text(size = 12))
-}
 if(type == 'reduced'){
   comp |>
-    ggplot(aes(x = Predicted, y = Observed)) +
+    ggplot(aes(x = Probability, y = Observed)) +
     geom_point() +
-    facet_wrap(~Ecosystem) +
+    facet_wrap(~Ecosystem, scales = 'free') +
     geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
                 color = 'maroon', fill = 'maroon') +
     theme_minimal() +
+    xlab('Predicted') + ylab('Observed') +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           axis.title = element_text(size = 14),
           axis.text = element_text(size = 12))
 }
+
 # Overall model
-form2 <- glm(Observed ~ Predicted, family = binomial, data = comp)
-summary(form2)
+form <- glm(Observed ~ Probability, family = binomial, data = comp)
+summary(form)
 # Overall R2
-with(summary(form2), 1 - deviance/null.deviance)
+with(summary(form), 1 - deviance/null.deviance)
 
 # Overall with random effect
 if(type == 'all'){
   comp$Taxon <- as.factor(comp$Taxon)
-  form2_rand <- glmer(Observed ~ Predicted + (1|Taxon), family = binomial, data = comp)
+  form_rand <- glmer(Observed ~ Probability + (1|Taxon), family = binomial, data = comp)
 }
 if(type == 'reduced'){
   comp$Ecosystem <- as.factor(comp$Ecosystem)
-  form2_rand <- glmer(Observed ~ Predicted + (1|Ecosystem), family = binomial, data = comp)
+  form_rand <- glmer(Observed ~ Probability + (1|Ecosystem), family = binomial, data = comp)
 }
-summary(form2_rand)
-piecewiseSEM::rsquared(form2_rand)
 
+summary(form_rand)
+piecewiseSEM::rsquared(form_rand)
+
+# Individual models
+if(type == 'all'){
+  comp_notree <- comp |>
+    filter(Taxon == 'No.tree')
+  comp_oak <- comp |>
+    filter(Taxon == 'Oak')
+  comp_elm <- comp |>
+    filter(Taxon == 'Elm')
+  comp_hickory <- comp |>
+    filter(Taxon == 'Hickory')
+  comp_ash <- comp |>
+    filter(Taxon == 'Ash')
+  comp_maple <- comp |>
+    filter(Taxon == 'Maple')
+  comp_basswood <- comp |>
+    filter(Taxon == 'Basswood')
+  comp_walnut <- comp |>
+    filter(Taxon == 'Walnut')
+  comp_ironwood <- comp |>
+    filter(Taxon == 'Ironwood')
+  comp_beech <- comp |>
+    filter(Taxon == 'Beech')
+  comp_dogwood <- comp |>
+    filter(Taxon == 'Dogwood')
+  comp_poplar <- comp |>
+    filter(Taxon == 'Poplar.tulip.poplar') 
+  comp_gum <- comp |>
+    filter(Taxon == 'Black.gum.sweet.gum')
+  comp_otherconifer <- comp |>
+    filter(Taxon == 'Other.conifer')
+  comp_otherhardwood <- comp |>
+    filter(Taxon == 'Other.hardwood')
+}
+
+if(type == 'reduced'){
+  comp_prairie <- comp |>
+    filter(Ecosystem == 'Prairie')
+  comp_savanna <- comp |>
+    filter(Ecosystem == 'Savanna')
+  comp_forest <- comp |>
+    filter(Ecosystem == 'Forest')
+}
+
+if(type == 'all'){
+  form_notree <- glm(Observed ~ Probability, family = binomial, data = comp_notree)
+  print(paste('no tree:', with(summary(form_notree), 1 - deviance/null.deviance)))
+  
+  form_oak <- glm(Observed~Probability, family = binomial, data = comp_oak)
+  print(paste('oak:', with(summary(form_oak), 1 - deviance/null.deviance)))
+  
+  form_elm <- glm(Observed ~ Probability, family = binomial, data = comp_elm)
+  print(paste('elm:', with(summary(form_elm), 1 - deviance/null.deviance)))
+  
+  form_hickory <- glm(Observed ~ Probability, family = binomial, data = comp_hickory)
+  print(paste('hickory:',with(summary(form_hickory), 1 - deviance/null.deviance)))
+  
+  form_ash <- glm(Observed ~ Probability, family = binomial, data = comp_ash)
+  print(paste('ash:', with(summary(form_ash), 1 - deviance/null.deviance)))
+  
+  form_maple <- glm(Observed ~ Probability, family = binomial, data = comp_maple)
+  print(paste('maple:', with(summary(form_maple), 1 - deviance/null.deviance)))
+  
+  form_basswood <- glm(Observed ~ Probability, family = binomial, data = comp_basswood)
+  print(paste('basswood:', with(summary(form_basswood), 1 - deviance/null.deviance)))
+  
+  form_beech <- glm(Observed ~ Probability, family = binomial, data = comp_beech)
+  print(paste('beech:', with(summary(form_beech), 1 - deviance/null.deviance)))
+  
+  form_bgsg <- glm(Observed ~ Probability, family = binomial, data = comp_gum)
+  print(paste('black gum/sweet gum:', with(summary(form_bgsg), 1 - deviance/null.deviance)))
+  
+  form_dogwood <- glm(Observed ~ Probability, family = binomial, data = comp_dogwood)
+  print(paste('dogwood:', with(summary(form_dogwood), 1 - deviance/null.deviance)))
+  
+  form_ironwood <- glm(Observed ~ Probability, family = binomial, data = comp_ironwood)
+  print(paste('ironwood:', with(summary(form_ironwood), 1 - deviance/null.deviance)))
+  
+  form_conifer <- glm(Observed ~ Probability, family = binomial, data = comp_otherconifer)
+  print(paste('other conifer:', with(summary(form_conifer), 1 - deviance/null.deviance)))
+  
+  form_hardwood <- glm(Observed ~ Probability, family = binomial, data = comp_otherhardwood)
+  print(paste('other hardwood:', with(summary(form_hardwood), 1 - deviance/null.deviance)))
+  
+  form_ptp <- glm(Observed ~ Probability, family = binomial, data = comp_poplar)
+  print(paste('tulip/tulip poplar:', with(summary(form_ptp), 1 - deviance/null.deviance)))
+}
+
+if(type == 'reduced'){
+  form_prairie <- glm(Observed ~ Probability, family = binomial, data = comp_prairie)
+  print(paste('prairie:', with(summary(form_prairie), 1 - deviance/null.deviance)))
+  
+  form_savanna <- glm(Observed ~ Probability, family = binomial, data = comp_savanna)
+  print(paste('savanna:', with(summary(form_savanna), 1 - deviance/null.deviance)))
+  
+  form_forest <- glm(Observed ~ Probability, family = binomial, data = comp_forest)
+  print(paste('forest:', with(summary(form_forest), 1 - deviance/null.deviance)))
+}
+
+# Difference between probability of presence and observed presence/absence over space
+if(type == 'all'){
+  xdata <- xdata |>
+    rownames_to_column(var = 'Index')
+  comp <- comp |>
+    left_join(xdata, by = 'Index') |>
+    select(c('Taxon', 'Probability', 'Predicted', 'Observed', 'lat', 'long'))
+  
+  # color interpretation:
+  # near 0 (white) = probability nearly matches observation
+  # near 1 (red) = high probability of presence when absent
+  # near -1 (blue) = high probability of absence when present
+  comp |>
+    mutate(difference = Observed - Probability) |>
+    ggplot(aes(x = long, y = lat, color = difference)) +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    geom_point(alpha = 0.7) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    facet_wrap(~Taxon) +
+    scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12))
+}
+
+if(type == 'reduced'){
+  xdata <- xdata |>
+    rownames_to_column(var = 'Index')
+  comp <- comp |>
+    left_join(xdata, by = 'Index') |>
+    select(c('Ecosystem', 'Probability', 'Predicted', 'Observed', 'lat', 'long'))
+  
+  # Color interpretation:
+  # near 0 (white) = probability nearly matches observation
+  # near 1 (red) = high probability of presence when absent
+  # near -1 (blue) = high probability of absence when present
+  comp |>
+    mutate(difference = Observed - Probability) |>
+    ggplot(aes(x = long, y = lat, color = difference)) +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    geom_point(alpha = 0.7) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    facet_wrap(~Ecosystem) +
+    scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12))
+}
