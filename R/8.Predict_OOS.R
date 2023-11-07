@@ -130,7 +130,7 @@ if(type == 'reduced'){
     ggplot() +
     geom_polygon(data = states, aes(x = long, y = lat, group = group), fill = NA, color = 'black') +
     coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
-    geom_point(aes(x = lon, y = lat, color = Probability)) +
+    geom_point(aes(x = lon, y = lat, color = Probability), shape = ".") +
     facet_wrap(~Ecosystem) +
     scale_color_viridis_c(option = 'A') +
     theme_void() +
@@ -339,3 +339,156 @@ if(type == 'reduced'){
   form_forest <- glm(Observed ~ Probability, family = binomial, data = comp_forest)
   print(paste('forest:', with(summary(form_forest), 1 - deviance/null.deviance)))
 }
+
+
+
+
+
+ydata_oos <- mutate(ydata_oos, lat = xdata$lat,
+                    lon = xdata$long)
+ydata_oos_new <- pivot_longer(ydata_oos, Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
+
+ 
+grapha <- ydata_oos_new |>
+    ggplot() +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Presence == 1), shape = ".", alpha = factor(ydata_oos_new$Presence)) +
+    scale_color_manual(values = c("white", "black"))+
+    facet_wrap(~Ecosystem) +
+    theme_void() +
+    theme(strip.text = element_text(size = 14, face = 'bold'),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12), 
+          legend.position = "none")+
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), fill = NA, color = 'black') 
+
+graphb <- if(type == 'reduced'){
+  pred_pr |>
+    mutate(lat = xdata$lat,
+           lon = xdata$long) |>
+    pivot_longer(Prairie:Forest, names_to = 'Ecosystem', values_to = 'Probability') |>
+    ggplot() +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), fill = NA, color = 'black') +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Probability), shape = ".") +
+    facet_wrap(~Ecosystem) +
+    scale_color_viridis_c(option = 'A') +
+    theme_void() +
+    theme(strip.text = element_blank(),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12), legend.position = "none")
+}
+
+
+load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
+
+# Clean up environment to make sure we are predicting correct data
+rm(edata, mlist, xdata, ydata, site_effort)
+
+# Load out of sample data
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
+
+# Specify whether all taxa or reduced taxa
+type <- 'reduced'
+
+# Take out  columns that will unnecessarily mess up gjamPredict
+xdata <- xdata_oos |> select(-Aspect, -type)
+
+# Three ecosystem types
+if(type == 'reduced'){
+  names <- c('Prairie', 'Forest', 'Savanna')
+  }
+cond_pred <- matrix(, nrow = nrow(ydata_oos), ncol = ncol(ydata_oos))
+cond_prob <- matrix(, nrow = nrow(ydata_oos), ncol = ncol(ydata_oos))
+# Column names for saving specific rows from names object
+colnames(cond_pred) <- colnames(cond_prob) <- names
+
+
+if(type == 'reduced'){
+  load('out/cond_pred_reduced_taxa.RData')
+}
+
+colnames(cond_pred) <- colnames(cond_prob) <- colnames(ydata_oos)
+
+cond_pred <- cbind(cond_pred, xdata$long, xdata$lat)
+cond_prob <- cbind(cond_prob, xdata$long, xdata$lat)
+
+if(type == 'all'){
+  colnames(cond_pred)[16:17] <- c('long', 'lat')
+  colnames(cond_prob)[16:17] <- c('long', 'lat')
+}
+if(type == 'reduced'){
+  colnames(cond_pred)[4:5] <- c('long', 'lat')
+  colnames(cond_prob)[4:5] <- c('long', 'lat')
+}
+
+cond_pred <- as.data.frame(cond_pred)
+cond_prob <- as.data.frame(cond_prob)
+
+states <- map_data('state', region = c('illinois', 'indiana'))
+
+  
+
+graphc <- if(type == 'reduced'){
+  cond_pred |>
+    pivot_longer(c(Prairie, Forest, Savanna),
+                 names_to = 'Ecosystem',
+                 values_to = 'Predicted') |>
+    ggplot(aes(x = long, y = lat, color = Predicted)) +
+    geom_point(shape = ".") +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    facet_wrap(~Ecosystem) +
+    theme_void() +
+    theme(strip.text = element_blank(),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12), legend.position = "none") +
+    scale_color_viridis_c(option = 'A') +
+    xlab('') + ylab('')
+  
+  cond_prob |>
+    pivot_longer(Prairie:Savanna,
+                 names_to = 'Ecosystem',
+                 values_to = 'Probability') |>
+    ggplot(aes(x = long, y = lat, color = Probability)) +
+    geom_point(shape = ".") +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    facet_wrap(~Ecosystem) +
+    theme_void() +
+    theme(strip.text = element_blank(),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12), legend.position = "none") +
+    scale_color_viridis_c(option = 'A') +
+    xlab('') + ylab('')
+}
+
+
+
+library(scales)
+graphd <- if(type == 'reduced'){
+  pred_pr |>
+    mutate(lat = xdata$lat,
+           lon = xdata$long) |>
+    pivot_longer(Prairie:Forest, names_to = 'Ecosystem', values_to = 'Probability') |>
+    ggplot() +
+    geom_polygon(data = states, aes(x = long, y = lat, group = group), fill = NA, color = 'black') +
+    coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    geom_point(aes(x = lon, y = lat, color = Probability), shape = ".") +
+    facet_wrap(~Ecosystem) +
+    scale_color_viridis_c(option = 'A') +
+    theme_void() +
+    theme(strip.text = element_blank(),
+          legend.title = element_text(size = 14),
+          legend.text = element_text(size = 12), 
+          legend.direction = "horizontal", 
+          legend.position = "bottom", 
+          legend.title.align = 0.5)
+}
+
+leg <- get_legend(graphd)
+
+plot_grid(graphb, graphc, leg, labels = c("A", "B"), ncol= 1)
+
+

@@ -11,19 +11,19 @@ library(gjam)
 
 # Load output from GJAM
 #load('out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
-load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
+#load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
 #load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
-#load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
+load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
-#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 
 # Specify whether all taxa or reduced taxa
-type <- 'all'
+type <- 'reduced'
 
 # Take out  columns that will unnecessarily mess up gjamPredict
 xdata <- xdata_oos |> select(-Aspect, -type)
@@ -120,7 +120,7 @@ if(type == 'all'){
                                          'Black gum/sweet gum', 'Dogwood',
                                          'Elm', 'Ironwood', 'Maple',
                                          'Other conifer', 'Other hardwood',
-                                         'Poplar/tulip poplar', 'Walnut')), nrow = 3, ncol = 5) +
+                                         'Poplar/tulip poplar', 'Walnut')), nrow = 5, ncol = 3) +
     theme_void() +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
@@ -149,7 +149,7 @@ if(type == 'all'){
                                          'Dogwood', 'Elm', 'Ironwood',
                                          'Maple', 'Other conifer',
                                          'Other hardwood', 'Poplar/tulip poplar',
-                                         'Walnut')), nrow = 3, ncol = 5) +
+                                         'Walnut')), nrow = 5, ncol = 3) +
     theme_void() +
     theme(strip.text = element_text(size = 14, face = 'bold'),
           legend.title = element_text(size = 14),
@@ -205,9 +205,9 @@ if(type == 'all'){
 }
 if(type == 'reduced'){
   pred2_yMu <- cond_pred |>
-    mutate(Index = rownames(ydata)) |>
+    mutate(Index = rownames(ydata_oos)) |>
     pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
-  ydata2 <- ydata |>
+  ydata2 <- ydata_oos |>
     rownames_to_column(var = 'Index') |>
     pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence')
 }
@@ -241,7 +241,7 @@ if(type == 'all'){
                                          'Elm', 'Ironwood', 'Maple',
                                          'Other conifer', 'Other hardwood',
                                          'Poplar/tulip poplar', 'Walnut')),
-               nrow = 3, ncol = 5) +
+               nrow = 5, ncol = 3) +
     geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
                 color = 'maroon', fill = 'maroon') +
     theme_minimal() +
