@@ -33,7 +33,7 @@ form1 <- as.formula(~ Slope + CAC + CEC + CLA + SAN +
 mlist <- list(ng = niter, burnin = nburn, typeNames = 'PA',
               random = 'marea', PREDICTX = F)
 
-out <- gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
+out <- gjam::gjam(form1, xdata = xdata, ydata = ydata, modelList = mlist)
 
 # Save
 save.image(file = 'out/reduced_taxa-all_cov_NOASPECT.RData')

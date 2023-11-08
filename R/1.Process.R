@@ -22,12 +22,12 @@ yedata_list <- list()
 for(i in 1:length(xfiles)){
   filename <- xfiles[i]
   pathname <- paste0('GJAMDATA/X/',filename)
-  xdata_list[[i]] <- read.csv(pathname)
+  xdata_list[[i]] <- utils::read.csv(pathname)
   xdata_list[[i]]$filename <- filename
   
   filename <- yfiles[i]
   pathname <- paste0('GJAMDATA/Y/',filename)
-  yedata_list[[i]] <- read.csv(pathname)
+  yedata_list[[i]] <- utils::read.csv(pathname)
   
   yedata_list[[i]] <- lapply(yedata_list[[i]], as.numeric)
   yedata_list[[i]]$filename <- filename
@@ -35,32 +35,32 @@ for(i in 1:length(xfiles)){
 
 # Unlist
 xdata <- do.call(rbind, xdata_list)
-yedata <- do.call(bind_rows, yedata_list)
+yedata <- do.call(dplyr::bind_rows, yedata_list)
 
 # Separate ydata fram edata
-ydata <- select(yedata, colnames(yedata)[!grepl('dist', colnames(yedata), fixed  = T)])
+ydata <- dplyr::select(yedata, colnames(yedata)[!grepl('dist', colnames(yedata), fixed  = T)])
 
 # Format management area columns
 xdata <- xdata |>
   # Subset the filename character string for
   # just the management area
-  mutate(marea = sub('_X.*', '', filename)) |>
+  dplyr::mutate(marea = sub('_X.*', '', filename)) |>
   # remove filename column and x and y since we have
   # lat and long
   dplyr::select(-filename, -x, -y) |>
   # make uniqueID that is specific to the corner
   # within each management area
-  mutate(uniqueID = paste0(marea,'_',uniqueID))
+  dplyr::mutate(uniqueID = paste0(marea,'_',uniqueID))
 
 # Repeat for ydata
 ydata <- ydata |>
-  mutate(marea = sub('_Y.*', '', filename)) |>
-  select(-filename) |>
-  mutate(uniqueID = paste0(marea,'_',uniqueID))
+  dplyr::mutate(marea = sub('_Y.*', '', filename)) |>
+  dplyr::select(-filename) |>
+  dplyr::mutate(uniqueID = paste0(marea,'_',uniqueID))
 
 # Join xdata and ydata by the unique ID
 full_data <- xdata |>
-  full_join(ydata, by = 'uniqueID')
+  dplyr::full_join(ydata, by = 'uniqueID')
 
 # Separate xdata and ydata
 # This is done to ensure that both dataframes are in the
@@ -72,21 +72,21 @@ colnames(xdata)[18] <- 'marea'
 
 # Convert xdata into the correct data types
 xdata <- xdata |>
-  mutate(uniqueID = as.factor(uniqueID),
+  dplyr::mutate(uniqueID = as.factor(uniqueID),
          Hydric = as.factor(Hydric),
          Floodplain = as.factor(Floodplain),
          direction = as.factor(direction)) |>
   # Add unique ID numbers to rownames
-  column_to_rownames(var = 'uniqueID')
+  tibble::column_to_rownames(var = 'uniqueID')
 
 ydata <- ydata |>
-  mutate(uniqueID = as.factor(uniqueID)) |>
+  dplyr::mutate(uniqueID = as.factor(uniqueID)) |>
   # Take out columns that we don't need
-  select(-c(chainstree, chainstree2, chainstree3, chainstree4, marea.y)) |>
+  dplyr::select(-c(chainstree, chainstree2, chainstree3, chainstree4, marea.y)) |>
   # Take out columns that don't contain any information
-  select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) |>
-  column_to_rownames(var = 'uniqueID') |>
-  replace_na(list(No.tree = 0, Oak = 0, Elm = 0, Hickory = 0,
+  dplyr::select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) |>
+  tibble::column_to_rownames(var = 'uniqueID') |>
+  tidyr::replace_na(list(No.tree = 0, Oak = 0, Elm = 0, Hickory = 0,
                   Ash = 0, Unknown.tree = 0, Poplar = 0, Maple = 0,
                   Sycamore = 0, Other.hardwood = 0, Mulberry = 0,
                   Basswood = 0, Walnut = 0, Cherry = 0, Locust = 0,
