@@ -5,29 +5,21 @@
 
 rm(list = ls())
 
-library(gjam)
-library(lme4)
-library(piecewiseSEM)
-library(dplyr)
-library(ggplot2)
-library(tidyr)
-library(tibble)
-
 # Load output from GJAM
 #load('out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
-#load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
-load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
+load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
+#load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
 #load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort, form1, nburn, niter)
 
 # Load out of sample data
-#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
-load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 
 # Specify whether all taxa or reduced taxa
-type <- 'reduced'
+type <- 'all'
 
 if(!exists('xdata_oos')) xdata_oos <- xdata
 if(!exists('ydata_oos')) ydata_oos <- ydata
@@ -50,51 +42,52 @@ pred_yMu <- as.data.frame(pred$sdList$yMu)
 pred_pr <- as.data.frame(pred$prPresent)
 
 # Map of study region
-states <- ggplot2::map_data('state') |>
-  dplyr::filter(region %in% c('indiana', 'illinois'))
+states <- sf::st_as_sf(maps::map('state', region = c('illinois', 'indiana'),
+                                 fill = TRUE, plot = FALSE))
+states <- sf::st_transform(states, crs = 'EPSG:4326')
 
 ## yMu = predicted y (presence/absence but for some reason on a continuous scale)
 if(type == 'all'){
   # Add the coordinates from the xdata
   pred_yMu |>
     dplyr::mutate(lat = xdata$lat,
-           lon = xdata$long) |>
+                  lon = xdata$long) |>
     # Make easier to plot
     tidyr::pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Presence') |>
     # Make taxon names easier to read
     dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+                  Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
     # Plot presence over space
     ggplot2::ggplot() +
-    ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), fill = 'white', color = 'black') +
-    ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Presence)) +
     ggplot2::facet_wrap(~Taxon, nrow = 3, ncol = 5) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12))
+                   legend.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12))
 }
 # Same procedure if reduced
 if(type == 'reduced'){
   pred_yMu |>
     dplyr::mutate(lat = xdata$lat,
-           lon = xdata$long) |>
+                  lon = xdata$long) |>
     tidyr::pivot_longer(Prairie:Forest, names_to = 'Ecosystem', values_to = 'Presence') |>
     ggplot2::ggplot() +
-    ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), fill = NA, color = 'black') +
-    ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Presence)) +
     ggplot2::facet_wrap(~Ecosystem) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12))
+                   legend.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12))
 }
 
 # Do the same with the probability of presence
@@ -102,39 +95,39 @@ if(type == 'reduced'){
 if(type == 'all'){
   pred_pr |>
     dplyr::mutate(lat = xdata$lat,
-           lon = xdata$long) |>
+                  lon = xdata$long) |>
     tidyr::pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Probability') |>
     dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+                  Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
     ggplot2::ggplot() +
-    ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), fill = NA, color = 'black') +
-    ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
     ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability)) +
     ggplot2::facet_wrap(~Taxon, nrow = 3, ncol = 5) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12))
+                   legend.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12))
 }
 if(type == 'reduced'){
   pred_pr |>
     dplyr::mutate(lat = xdata$lat,
-           lon = xdata$long) |>
+                  lon = xdata$long) |>
     tidyr::pivot_longer(Prairie:Forest, names_to = 'Ecosystem', values_to = 'Probability') |>
     ggplot2::ggplot() +
-    ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), fill = NA, color = 'black') +
-    ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
-    ggplot2::geom_point(aes(x = lon, y = lat, color = Probability)) +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability)) +
     ggplot2::facet_wrap(~Ecosystem) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12))
+                   legend.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12))
 }
 
 # Now compare with observation
@@ -165,7 +158,7 @@ if(type == 'all'){
 }
 if(type == 'reduced'){
   comp_1 <- pred_yMu_long |>
-    full_join(ydata_oos_long, by = c('Index', 'Ecosystem'))
+    dplyr::full_join(ydata_oos_long, by = c('Index', 'Ecosystem'))
   colnames(comp_1) <- c('Index', 'Ecosystem', 'Predicted', 'Observed')
 }
 
@@ -191,34 +184,34 @@ if(type == 'reduced'){
 if(type == 'all'){
   comp |>
     dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
-           Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
-          Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
+                  Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
     ggplot2::ggplot(ggplot2::aes(x = Probability, y = Observed)) +
     ggplot2::geom_point() +
     ggplot2::facet_wrap(~Taxon, scales = 'free', nrow = 3, ncol = 5) +
     ggplot2::geom_smooth(method = 'glm', method.args = list(family = 'binomial'), 
-                color = 'maroon', fill = 'maroon') +
+                         color = 'maroon', fill = 'maroon') +
     ggplot2::xlab('Predicted') + ggplot2::ylab('Observed') +
     ggplot2::theme_minimal() +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12))
+                   axis.title = ggplot2::element_text(size = 14),
+                   axis.text = ggplot2::element_text(size = 12))
 }
 
 if(type == 'reduced'){
   comp |>
-    ggplot2::ggplot(aes(x = Probability, y = Observed)) +
+    ggplot2::ggplot(ggplot2::aes(x = Probability, y = Observed)) +
     ggplot2::geom_point() +
     ggplot2::facet_wrap(~Ecosystem, scales = 'free') +
     ggplot2::geom_smooth(method = 'glm', method.args = list(family = 'binomial'),
-                color = 'maroon', fill = 'maroon') +
+                         color = 'maroon', fill = 'maroon') +
     ggplot2::theme_minimal() +
     ggplot2::xlab('Predicted') + ggplot2::ylab('Observed') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12))
+                   axis.title = ggplot2::element_text(size = 14),
+                   axis.text = ggplot2::element_text(size = 12))
 }
 
 # Overall model
@@ -352,16 +345,16 @@ if(type == 'all'){
   # near -1 (blue) = high probability of absence when present
   comp |>
     dplyr::mutate(difference = Observed - Probability) |>
-    ggplot2::ggplot(ggplot2::aes(x = long, y = lat, color = difference)) +
-    ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    ggplot2::geom_point(alpha = 0.7) +
-    ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    ggplot2::ggplot() +
+    ggplot2::geom_point(alpha = 0.7, ggplot2::aes(x = long, y = lat, color = difference)) +
     ggplot2::facet_wrap(~Taxon) +
     ggplot2::scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
     ggplot2::theme_void() +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_blank(),
-          legend.text = ggplot2::element_text(size = 12))
+                   legend.title = ggplot2::element_blank(),
+                   legend.text = ggplot2::element_text(size = 12))
 }
 
 if(type == 'reduced'){
@@ -377,14 +370,14 @@ if(type == 'reduced'){
   # near -1 (blue) = high probability of absence when present
   comp |>
     dplyr::mutate(difference = Observed - Probability) |>
-    ggplot2::ggplot(ggplot2::aes(x = long, y = lat, color = difference)) +
-    ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-    ggplot2::geom_point(alpha = 0.7) +
-    ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+    ggplot2::ggplot() +
+    ggplot2::geom_point(alpha = 0.7, ggplot2::aes(x = long, y = lat, color = difference)) +
     ggplot2::facet_wrap(~Ecosystem) +
     ggplot2::scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
     ggplot2::theme_void() +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_blank(),
-          legend.text = ggplot2::element_text(size = 12))
+                   legend.title = ggplot2::element_blank(),
+                   legend.text = ggplot2::element_text(size = 12))
 }

@@ -7,10 +7,6 @@
 
 rm(list = ls())
 
-library(ggplot2)
-library(fields)
-library(dplyr)
-
 # Load out-of-sample data
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata.RData')
 
@@ -18,7 +14,7 @@ load('GJAMDATA/Withheld For Validation/validation_processed_xydata.RData')
 # manipulate management area column
 xdata_oos <- xdata_oos |>
   dplyr::mutate(type = as.factor('oos'),
-         marea = as.factor(marea))
+                marea = as.factor(marea))
 
 # Load in-sample data
 load('GJAMDATA/processed_xydata.RData')
@@ -27,10 +23,12 @@ load('GJAMDATA/processed_xydata.RData')
 # and manipulate management area
 xdata <- xdata |>
   dplyr::mutate(type = as.factor('is'),
-         marea = as.factor(marea))
+                marea = as.factor(marea))
 
 # map of study region for plotting
-states <- ggplot2::map_data('state', region = c('illinois', 'indiana'))
+states <- sf::st_as_sf(maps::map('state', region = c('indiana', 'illinois'),
+                                 fill = TRUE, plot = FALSE))
+states <- sf::st_transform(states, crs = 'EPSG:4326')
 
 ## Find approximate center of each management area
 
@@ -63,7 +61,7 @@ coords$long <- as.numeric(coords$long)
 
 # Check to make sure the centers are representative
 ggplot2::ggplot() +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
   ggplot2::geom_point(data = xdata, ggplot2::aes(x = long, y = lat)) +
   ggplot2::geom_point(data = coords, ggplot2::aes(x = long, y = lat), color = 'red')
 
@@ -79,7 +77,7 @@ out_sample <- out_sample |>
 
 # Find distances between out-of-sample and in-sample management areas
 dists <- fields::rdist(dplyr::select(in_sample, lat, long),
-               dplyr::select(out_sample, lat, long))
+                       dplyr::select(out_sample, lat, long))
 
 # Find the closest in-sample management area for each
 # out-of-sample management area
@@ -92,17 +90,17 @@ out_sample$closest <- closest_marea
 # Replace management area in out-of-sample data based on out_sample dataframe
 xdata_oos <- xdata_oos |>
   dplyr::mutate(marea = dplyr::if_else(marea == 'IL_Forest1', 'IL_Small3', marea),
-         marea = dplyr::if_else(marea == 'IL_River1', 'IL_River2', marea),
-         marea = dplyr::if_else(marea == 'IL_Small2', 'IL_Prairie1', marea),
-         marea = dplyr::if_else(marea == 'IN_Forest3', 'IN_HoosierSouth', marea),
-         marea = dplyr::if_else(marea == 'IN_Forest4', 'IN_Forest1', marea),
-         marea = dplyr::if_else(marea == 'IN_Indianapolis', 'IN_Forest1', marea),
-         marea = dplyr::if_else(marea == 'IN_Prairie1', 'IL_Prairie1', marea))
+                marea = dplyr::if_else(marea == 'IL_River1', 'IL_River2', marea),
+                marea = dplyr::if_else(marea == 'IL_Small2', 'IL_Prairie1', marea),
+                marea = dplyr::if_else(marea == 'IN_Forest3', 'IN_HoosierSouth', marea),
+                marea = dplyr::if_else(marea == 'IN_Forest4', 'IN_Forest1', marea),
+                marea = dplyr::if_else(marea == 'IN_Indianapolis', 'IN_Forest1', marea),
+                marea = dplyr::if_else(marea == 'IN_Prairie1', 'IL_Prairie1', marea))
 
 # Plot to make sure the new management areas make sense
 ggplot2::ggplot() +
   ggplot2::geom_point(data = xdata, ggplot2::aes(x = long, y = lat, color = marea)) +
   ggplot2::geom_point(data = xdata_oos, ggplot2::aes(x = long, y = lat, color = marea)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA)
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1)
 
 save(xdata_oos, ydata_oos, file = 'GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea.RData')

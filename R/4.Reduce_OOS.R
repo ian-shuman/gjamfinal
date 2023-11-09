@@ -4,10 +4,6 @@
 
 rm(list = ls())
 
-library(tidyr)
-library(dplyr)
-library(ggplot2)
-
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea.RData')
 
 new.ydata <- ydata_oos |>
@@ -31,19 +27,19 @@ new.ydata <- ydata_oos |>
   dplyr::select(-c(Bald.cypress, Pine)) |>
   # Repeat with our category of "other hardwoods"
   dplyr::mutate(Other.hardwood.2 = Birch + Locust + Willow + Cherry +
-           Sycamore + Buckeye + Hackberry + Mulberry + Other.hardwood + Chestnut) |>
+                  Sycamore + Buckeye + Hackberry + Mulberry + Other.hardwood + Chestnut) |>
   dplyr::mutate(Other.hardwood.2 = dplyr::if_else(Other.hardwood.2 > 1, 1, Other.hardwood.2)) |>
   dplyr::select(-c(Birch, Locust, Willow, Cherry, Sycamore,
-            Buckeye, Hackberry, Mulberry, Other.hardwood, Chestnut)) |>
+                   Buckeye, Hackberry, Mulberry, Other.hardwood, Chestnut)) |>
   dplyr::rename(Other.hardwood = Other.hardwood.2)
 
 new.ydata |>
   tidyr::pivot_longer(Elm:Other.hardwood, names_to = 'taxon', values_to = 'PA') |>
   dplyr::mutate(taxon = dplyr::if_else(taxon == 'No.tree', 'No Tree', taxon),
-         taxon = dplyr::if_else(taxon == 'Other.hardwood', 'Other Hardwood', taxon),
-         taxon = dplyr::if_else(taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum', taxon),
-         taxon = dplyr::if_else(taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar', taxon),
-         taxon = dplyr::if_else(taxon == 'Other.conifer', 'Other Conifer', taxon)) |>
+                taxon = dplyr::if_else(taxon == 'Other.hardwood', 'Other Hardwood', taxon),
+                taxon = dplyr::if_else(taxon == 'Black.gum.sweet.gum', 'Black Gum/Sweet Gum', taxon),
+                taxon = dplyr::if_else(taxon == 'Poplar.tulip.poplar', 'Poplar/Tulip Poplar', taxon),
+                taxon = dplyr::if_else(taxon == 'Other.conifer', 'Other Conifer', taxon)) |>
   dplyr::group_by(taxon) |>
   dplyr::summarize(count = length(which(PA == 1))) |>
   ggplot2::ggplot(ggplot2::aes(x = stats::reorder(taxon, count), y = count)) +

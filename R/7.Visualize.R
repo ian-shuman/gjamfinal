@@ -4,24 +4,16 @@
 
 rm(list = ls())
 
-library(corrplot)
-library(cowplot)
-library(RColorBrewer)
-library(dplyr)
-library(tibble)
-library(ggplot2)
-library(tidyr)
-
 # Load data for given model
 # Should load the "combined.RData" file in the
 # subfolder of the "out" directory corresponding to the
 # model of interest
-load('out/Reduced_taxa~all_cov_NOASPECT/combined.RData')
+load('out/All_taxa~all_cov_NOASPECT/combined.RData')
 
 ## All figures are produced for the "no aspect" simulations but could
 ## easily be modified to include aspect
 
-type <- 'reduced' # reduced or all
+type <- 'all' # reduced or all
 
 ## Correlations between taxa and drivers
 
@@ -33,9 +25,9 @@ if(type == 'reduced'){
   bFacGibbs_long <- bFacGibbs |>
     dplyr::select(-c(chain, iter)) |>
     tidyr::pivot_longer(Prairie_Slope:Forest_FloodplainYes,
-                 names_to = 'var', values_to = 'val') |>
+                        names_to = 'var', values_to = 'val') |>
     dplyr::mutate(taxon = sub(pattern = '_.*', replacement = '', x = var),
-           covariate = sub(pattern = '.*_', replacement = '', x = var)) |>
+                  covariate = sub(pattern = '.*_', replacement = '', x = var)) |>
     dplyr::filter(covariate != 'FloodplainNo') |>
     dplyr::filter(covariate != 'HydricNo')
 }
@@ -43,9 +35,9 @@ if(type == 'all'){
   bFacGibbs_long <- bFacGibbs |>
     dplyr::select(-c(chain, iter)) |>
     tidyr::pivot_longer(No.tree_Slope:Other.hardwood_FloodplainYes,
-                 names_to = 'var', values_to = 'val') |>
+                        names_to = 'var', values_to = 'val') |>
     dplyr::mutate(taxon = sub(pattern = '_.*', replacement = '', x = var),
-           covariate = sub(pattern = '.*_', replacement = '', x = var)) |>
+                  covariate = sub(pattern = '.*_', replacement = '', x = var)) |>
     dplyr::filter(covariate != 'FloodplainNo') |>
     dplyr::filter(covariate != 'HydricNo')
 }
@@ -66,7 +58,7 @@ corr <- as.data.frame(corr)
 corr <- corr |>
   tibble::rownames_to_column(var = 'beta') |>
   dplyr::mutate(taxon = sub('_.*', '', beta),
-         covariate = sub('.*_', '', beta))
+                covariate = sub('.*_', '', beta))
 
 # Specify color palette
 if(type == 'all'){
@@ -85,21 +77,21 @@ if(type == 'all'){
     dplyr::filter(covariate != 'HydricNo') |>
     dplyr::filter(covariate != 'FloodplainNo') |>
     dplyr::mutate(taxon = dplyr::if_else(taxon == 'Black.gum.sweet.gum', 'Black gum/wweet gum', taxon),
-           taxon = dplyr::if_else(taxon == 'No.tree', 'No tree', taxon),
-           taxon = dplyr::if_else(taxon == 'Other.conifer', 'Other conifer', taxon),
-           taxon = dplyr::if_else(taxon == 'Other.hardwood', 'Other hardwood', taxon),
-           taxon = dplyr::if_else(taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', taxon)) |>
+                  taxon = dplyr::if_else(taxon == 'No.tree', 'No tree', taxon),
+                  taxon = dplyr::if_else(taxon == 'Other.conifer', 'Other conifer', taxon),
+                  taxon = dplyr::if_else(taxon == 'Other.hardwood', 'Other hardwood', taxon),
+                  taxon = dplyr::if_else(taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', taxon)) |>
     dplyr::rename(Taxon = taxon)
   
   my_labeller <- ggplot2::as_labeller(x = c(Slope = 'Slope', CAC = 'CaCO[3]',
-                                   CEC = "`Cation exchange capacity`",
-                                   CLA = '`Soil % clay`', SAN = '`Soil % sand`',
-                                   WAT = '`Available water content`',
-                                   mean.SWI = '`Saga Wetness Index`',
-                                   totalPPT = 'Precipitation',
-                                   MeanTEMP = 'Temperature',
-                                   HydricYes = '`Hydric soil`',
-                                   FloodplainYes = 'Floodplain'), default = label_parsed)
+                                            CEC = "`Cation exchange capacity`",
+                                            CLA = '`Soil % clay`', SAN = '`Soil % sand`',
+                                            WAT = '`Available water content`',
+                                            mean.SWI = '`Saga Wetness Index`',
+                                            totalPPT = 'Precipitation',
+                                            MeanTEMP = 'Temperature',
+                                            HydricYes = '`Hydric soil`',
+                                            FloodplainYes = 'Floodplain'), default = ggplot2::label_parsed)
   
   bFacGibbs_long |>
     dplyr::rename(Taxon = taxon) |>
@@ -107,72 +99,72 @@ if(type == 'all'){
     ggplot2::geom_violin(ggplot2::aes(x = Taxon, y = val, color = Taxon)) +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')),
-               labeller = my_labeller, scales = 'free_y',
-               nrow = 4, ncol = 3) +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')),
+                        labeller = my_labeller, scales = 'free_y',
+                        nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
-                                'Ash', 'Basswood', 'Beech',
-                                'Black gum/sweet gum',
-                                'Dogwood', 'Elm',
-                                'Ironwood', 'Maple', 'Other conifer',
-                                'Other hardwood', 'Poplar/tulip poplar',
-                                'Walnut')) +
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum',
+                                         'Dogwood', 'Elm',
+                                         'Ironwood', 'Maple', 'Other conifer',
+                                         'Other hardwood', 'Poplar/tulip poplar',
+                                         'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
-                                  'Ash', 'Basswood', 'Beech',
-                                  'Black gum/sweet gum',
-                                  'Dogwood', 'Elm',
-                                  'Ironwood', 'Maple', 'Other conifer',
-                                  'Other hardwood', 'Poplar/tulip poplar',
-                                  'Walnut'),
-                       values = pal) +
+                                           'Hickory', 'Oak',
+                                           'Ash', 'Basswood', 'Beech',
+                                           'Black gum/sweet gum',
+                                           'Dogwood', 'Elm',
+                                           'Ironwood', 'Maple', 'Other conifer',
+                                           'Other hardwood', 'Poplar/tulip poplar',
+                                           'Walnut'),
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.title = ggplot2::element_text(size = 14),
-          axis.text.y = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.title = ggplot2::element_text(size = 14),
+                   axis.text.y = ggplot2::element_text(size = 12))
   
   for_plotting |>
     ggplot2::ggplot() +
     ggplot2::geom_boxplot(ggplot2::aes(x = Taxon, ymin = lower, lower = mean - sd, 
-                     middle = mean, upper = mean + sd, ymax = upper, 
-                     color = Taxon), stat = 'identity') +
+                                       middle = mean, upper = mean + sd, ymax = upper, 
+                                       color = Taxon), stat = 'identity') +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')), 
-               labeller = my_labeller, scales = 'free_y',
-               nrow = 4, ncol = 3) +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')), 
+                        labeller = my_labeller, scales = 'free_y',
+                        nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
-                                'Ash', 'Basswood', 'Beech',
-                                'Black gum/sweet gum',
-                                'Dogwood', 'Elm',
-                                'Ironwood', 'Maple', 'Other conifer',
-                                'Other hardwood', 'Poplar/tulip poplar',
-                                'Walnut')) +
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum',
+                                         'Dogwood', 'Elm',
+                                         'Ironwood', 'Maple', 'Other conifer',
+                                         'Other hardwood', 'Poplar/tulip poplar',
+                                         'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
-                                  'Ash', 'Basswood',
-                                  'Beech', 'Black gum/sweet gum',
-                                  'Dogwood', 'Elm',
-                                  'Ironwood', 'Maple',
-                                  'Other conifer', 'Other hardwood',
-                                  'Poplar/tulip poplar', 'Walnut'),
-                       values = pal) +
+                                           'Hickory', 'Oak',
+                                           'Ash', 'Basswood',
+                                           'Beech', 'Black gum/sweet gum',
+                                           'Dogwood', 'Elm',
+                                           'Ironwood', 'Maple',
+                                           'Other conifer', 'Other hardwood',
+                                           'Poplar/tulip poplar', 'Walnut'),
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text.y = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text.y = ggplot2::element_text(size = 12))
 }
 if(type == 'reduced'){
   for_plotting <- corr |>
@@ -180,15 +172,15 @@ if(type == 'reduced'){
     dplyr::filter(covariate != 'FloodplainNo') |>
     dplyr::rename(Ecosystem = taxon)
   
-  my_labeller <- as_labeller(x = c(Slope = 'Slope', 'CAC' = 'CaCO[3]',
-                                   CEC = '`Cation exchange capacity`',
-                                   CLA = '`Soil % clay`', SAN = '`Soil % sand`',
-                                   WAT = '`Available water content`',
-                                   totalPPT = 'Precipitation',
-                                   MeanTEMP = 'Temperature',
-                                   HydricYes = '`Hydric soil`',
-                                   mean.SWI = '`Saga Wetness Index`',
-                                   FloodplainYes = 'Floodplain'), default = label_parsed)
+  my_labeller <- ggplot2::as_labeller(x = c(Slope = 'Slope', 'CAC' = 'CaCO[3]',
+                                            CEC = '`Cation exchange capacity`',
+                                            CLA = '`Soil % clay`', SAN = '`Soil % sand`',
+                                            WAT = '`Available water content`',
+                                            totalPPT = 'Precipitation',
+                                            MeanTEMP = 'Temperature',
+                                            HydricYes = '`Hydric soil`',
+                                            mean.SWI = '`Saga Wetness Index`',
+                                            FloodplainYes = 'Floodplain'), default = ggplot2::label_parsed)
   
   bFacGibbs_long |>
     dplyr::rename(Ecosystem = taxon) |>
@@ -196,44 +188,44 @@ if(type == 'reduced'){
     ggplot2::geom_violin(ggplot2::aes(x = Ecosystem, y = val, color = Ecosystem)) +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')),
-               labeller = my_labeller, scales = 'free_y',
-               nrow = 4, ncol = 3) +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')),
+                        labeller = my_labeller, scales = 'free_y',
+                        nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('Prairie', 'Savanna', 'Forest')) +
     ggplot2::scale_color_manual(limits = c('Prairie', 'Savanna', 'Forest'),
-                       values = pal) +
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text.y = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text.y = ggplot2::element_text(size = 12))
   
   for_plotting |>
     ggplot2::ggplot() +
-    geom_boxplot(ggplot2::aes(x = Ecosystem, ymin = lower, lower = mean - sd,
-                     middle = mean, upper = mean + sd, ymax = upper,
-                     color = Ecosystem), stat = 'identity') +
+    ggplot2::geom_boxplot(ggplot2::aes(x = Ecosystem, ymin = lower, lower = mean - sd,
+                                       middle = mean, upper = mean + sd, ymax = upper,
+                                       color = Ecosystem), stat = 'identity') +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT', 
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')),
-               labeller = my_labeller, scales = 'free_y',
-               nrow = 4, ncol = 3) +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')),
+                        labeller = my_labeller, scales = 'free_y',
+                        nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('Prairie', 'Savanna', 'Forest')) +
     ggplot2::scale_color_manual(limits = c('Prairie', 'Savanna', 'Forest'),
-                       values = pal) +
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text.y = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text.y = ggplot2::element_text(size = 12))
 }
 
 # Plot with fixed y axis
@@ -245,70 +237,70 @@ if(type == 'all'){
     ggplot2::geom_violin(ggplot2::aes(x = Taxon, y = val, color = Taxon)) +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')),
-               labeller = my_labeller, scales = 'fixed',
-               nrow = 4, ncol = 3) +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')),
+                        labeller = my_labeller, scales = 'fixed',
+                        nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimates') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
-                                'Ash', 'Basswood', 'Beech',
-                                'Black gum/sweet gum',
-                                'Dogwood', 'Elm',
-                                'Ironwood', 'Maple', 'Other conifer',
-                                'Other hardwood', 'Poplar/tulip poplar',
-                                'Walnut')) +
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood', 'Beech',
+                                         'Black gum/sweet gum',
+                                         'Dogwood', 'Elm',
+                                         'Ironwood', 'Maple', 'Other conifer',
+                                         'Other hardwood', 'Poplar/tulip poplar',
+                                         'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
-                                  'Ash', 'Basswood', 'Beech',
-                                  'Black gum/sweet gum',
-                                  'Dogwood', 'Elm',
-                                  'Ironwood', 'Maple', 'Other conifer',
-                                  'Other hardwood', 'Poplar/tulip poplar',
-                                  'Walnut'),
-                       values = pal) +
+                                           'Hickory', 'Oak',
+                                           'Ash', 'Basswood', 'Beech',
+                                           'Black gum/sweet gum',
+                                           'Dogwood', 'Elm',
+                                           'Ironwood', 'Maple', 'Other conifer',
+                                           'Other hardwood', 'Poplar/tulip poplar',
+                                           'Walnut'),
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text.y = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text.y = ggplot2::element_text(size = 12))
   
   for_plotting |>
     ggplot2::ggplot() +
     ggplot2::geom_boxplot(ggplot2::aes(x = Taxon, ymin = lower, lower = mean - sd,
-                     middle = mean, upper = mean + sd, ymax = upper,
-                     color = Taxon), stat = 'identity') +
+                                       middle = mean, upper = mean + sd, ymax = upper,
+                                       color = Taxon), stat = 'identity') +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')), labeller = my_labeller, scales = 'fixed') +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')), labeller = my_labeller, scales = 'fixed') +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
-                                'Ash', 'Basswood',
-                                'Beech', 'Black gum/sweet gum',
-                                'Dogwood', 'Elm', 'Ironwood',
-                                'Maple', 'Other conifer',
-                                'Other hardwood',
-                                'Poplar/tulip poplar', 'Walnut')) +
+                                         'Hickory', 'Oak',
+                                         'Ash', 'Basswood',
+                                         'Beech', 'Black gum/sweet gum',
+                                         'Dogwood', 'Elm', 'Ironwood',
+                                         'Maple', 'Other conifer',
+                                         'Other hardwood',
+                                         'Poplar/tulip poplar', 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
-                                  'Ash', 'Basswood',
-                                  'Beech', 'Black gum/sweet gum',
-                                  'Dogwood', 'Elm', 'Ironwood',
-                                  'Maple', 'Other conifer',
-                                  'Other hardwood',
-                                  'Poplar/tulip poplar', 'Walnut'),
-                       values = pal) +
+                                           'Hickory', 'Oak',
+                                           'Ash', 'Basswood',
+                                           'Beech', 'Black gum/sweet gum',
+                                           'Dogwood', 'Elm', 'Ironwood',
+                                           'Maple', 'Other conifer',
+                                           'Other hardwood',
+                                           'Poplar/tulip poplar', 'Walnut'),
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text = ggplot2::element_text(size = 12))
 }
 # Figure 4
 if(type == 'reduced'){
@@ -318,44 +310,44 @@ if(type == 'reduced'){
     ggplot2::geom_violin(ggplot2::aes(x = Ecosystem, y = val, color = Ecosystem)) +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')),
-               labeller = my_labeller,
-               scales=  'fixed') +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')),
+                        labeller = my_labeller,
+                        scales=  'fixed') +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('Prairie', 'Savanna', 'Forest')) +
     ggplot2::scale_color_manual(limits = c('Prairie', 'Savanna', 'Forest'),
-                       values = pal) +
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text = ggplot2::element_text(size = 12))
   
   for_plotting |>
     ggplot2::ggplot() +
     ggplot2::geom_boxplot(ggplot2::aes(x = Ecosystem, ymin = lower, lower = mean - sd,
-                 middle = mean, upper = mean + sd, ymax = upper,
-                 color = Ecosystem), stat = 'identity') +
+                                       middle = mean, upper = mean + sd, ymax = upper,
+                                       color = Ecosystem), stat = 'identity') +
     ggplot2::geom_hline(ggplot2::aes(yintercept = 0), color = 'darkgrey', linetype = 'dashed') +
     ggplot2::facet_wrap(~factor(covariate, levels = c('MeanTEMP', 'totalPPT',
-                                             'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
-                                             'mean.SWI', 'Slope', 'FloodplainYes')), 
-               labeller = my_labeller,
-               scales = 'fixed') +
+                                                      'CAC', 'CEC', 'CLA', 'SAN', 'WAT', 'HydricYes',
+                                                      'mean.SWI', 'Slope', 'FloodplainYes')), 
+                        labeller = my_labeller,
+                        scales = 'fixed') +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('Prairie', 'Savanna', 'Forest')) +
     ggplot2::scale_color_manual(limits = c('Prairie', 'Savanna', 'Forest'),
-                       values = pal) +
+                                values = pal) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-          strip.text = ggplot2::element_text(size = 14, face = 'bold'),
-          legend.title = ggplot2::element_text(size = 14),
-          axis.title = ggplot2::element_text(size = 14),
-          legend.text = ggplot2::element_text(size = 12),
-          axis.text = ggplot2::element_text(size = 12))
+                   strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+                   legend.title = ggplot2::element_text(size = 14),
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.text = ggplot2::element_text(size = 12),
+                   axis.text = ggplot2::element_text(size = 12))
 }
 
 # Do some cleaning of the sensitivity (fSensGibbs)
@@ -383,62 +375,62 @@ if(type == 'all'){
   for_plotting2 |>
     ggplot2::ggplot() +
     ggplot2::geom_boxplot(ggplot2::aes(x = reorder(covar, mean, decreasing = F), 
-                     ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, 
-                     color = reorder(covar, mean, decreasing = T)), stat = 'identity', show.legend = F) +
+                                       ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper, 
+                                       color = reorder(covar, mean, decreasing = T)), stat = 'identity', show.legend = F) +
     ggplot2::coord_flip() +
     ggplot2::xlab('') + ggplot2::ylab(expression(paste('Sensitivity (', hat(F) ,')'))) +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#88ccee', # temperature - climate
-                                  '#88ccee', # precipitation - climate
-                                  '#999932', # cation exchange capacity - soil
-                                  '#aa4499', # floodplain - topography
-                                  '#999932', # soil % clay - soil
-                                  '#999932', # hydric soil - soil
-                                  '#999932', # CaCO3 - soil
-                                  '#999932', # available water content - soil
-                                  '#999932', # soil % sand - soil
-                                  '#aa4499', # saga wetness index - topography
-                                  '#aa4499' # slope - topography
-    ), name = '') +
+                                           '#88ccee', # precipitation - climate
+                                           '#999932', # cation exchange capacity - soil
+                                           '#aa4499', # floodplain - topography
+                                           '#999932', # soil % clay - soil
+                                           '#999932', # hydric soil - soil
+                                           '#999932', # CaCO3 - soil
+                                           '#999932', # available water content - soil
+                                           '#999932', # soil % sand - soil
+                                           '#aa4499', # saga wetness index - topography
+                                           '#aa4499' # slope - topography
+                                           ), name = '') +
     ggplot2::scale_x_discrete(labels = c('totalPPT' = 'Precipitation', 'MeanTEMP' = 'Temperature',
-                                'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
-                                'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
-                                'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
-                                'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
+                                         'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
+                                         'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
+                                         'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
+                                         'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
     ggplot2::theme(axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12))
+                   axis.text = ggplot2::element_text(size = 12))
   
   fSensGibbs |>
     dplyr::select(-c(HydricNo, FloodplainNo, chain, iter)) |>
     tidyr::pivot_longer(Slope:FloodplainYes, names_to = 'covariate', values_to = 'val') |>
     ggplot2::ggplot() +
-    ggplot2::geom_violin(aes(x = factor(covariate, levels = c('Slope', 'mean.SWI', 'SAN',
-                                                     'WAT', 'CAC', 'HydricYes',
-                                                     'FloodplainYes', 'CLA', 'CEC',
-                                                     'MeanTEMP', 'totalPPT')),
-                    y = val, color = covariate), show.legend = F) +
+    ggplot2::geom_violin(ggplot2::aes(x = factor(covariate, levels = c('Slope', 'mean.SWI', 'SAN',
+                                                              'WAT', 'CAC', 'HydricYes',
+                                                              'FloodplainYes', 'CLA', 'CEC',
+                                                              'MeanTEMP', 'totalPPT')),
+                             y = val, color = covariate), show.legend = F) +
     ggplot2::coord_flip() +
     ggplot2::xlab('') + ggplot2::ylab(expression(paste('Sensitivity (',hat(F),')'))) +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#999932', #cac03 - soil
-                                  '#999932', # cation exchange capacity - soil
-                                  '#999932', # soil % clay - soil
-                                  '#aa4499', # floodplain - topography
-                                  '#999932', # hydric soil - soil
-                                  '#aa4499', # saga wetness index - topography
-                                  '#88ccee', # temperature - climate
-                                  '#999932', # soil % sand - soil
-                                  '#aa4499', # slope -topography
-                                  '#88ccee', # precipitation - climate
-                                  '#999932' # available water content - soil
-                                  ), name = '') +
+                                           '#999932', # cation exchange capacity - soil
+                                           '#999932', # soil % clay - soil
+                                           '#aa4499', # floodplain - topography
+                                           '#999932', # hydric soil - soil
+                                           '#aa4499', # saga wetness index - topography
+                                           '#88ccee', # temperature - climate
+                                           '#999932', # soil % sand - soil
+                                           '#aa4499', # slope -topography
+                                           '#88ccee', # precipitation - climate
+                                           '#999932' # available water content - soil
+                                           ), name = '') +
     ggplot2::scale_x_discrete(labels = c('totalPPT' = 'Precipitation', 'MeanTEMP' = 'Temperature',
-                                'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
-                                'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
-                                'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
-                                'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
+                                         'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
+                                         'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
+                                         'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
+                                         'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
     ggplot2::theme(axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12))
+                   axis.text = ggplot2::element_text(size = 12))
 }
 
 # Figure 3
@@ -450,62 +442,62 @@ if(type == 'reduced'){
   for_plotting2 |>
     ggplot2::ggplot() +
     ggplot2::geom_boxplot(ggplot2::aes(x = reorder(covar, mean, decreasing = F),
-                     ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper,
-                     color = reorder(covar, mean, decreasing = T)), stat = 'identity', show.legend = F) +
+                                       ymin = lower, lower = mean - sd, middle = mean, upper = mean + sd, ymax = upper,
+                                       color = reorder(covar, mean, decreasing = T)), stat = 'identity', show.legend = F) +
     ggplot2::coord_flip() +
     ggplot2::xlab('') + ggplot2::ylab(expression(paste('Sensitivity (',hat(F),')'))) +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#88ccee', # precipitation - climate
-                                  '#aa4499', # floodplain - topography
-                                  '#88ccee', # temperature - climate
-                                  '#999932', # hydric soil - soil
-                                  '#999932', # caco3 - soil
-                                  '#999932', # soil % clay - soil
-                                  '#aa4499', # saga wetness index - topography
-                                  '#999932', # available water content - soil
-                                  '#999932', # cation exchange capacity - soil
-                                  '#999932', # soil % sand - soil
-                                  '#aa4499' # slope - topography
-                                  ), name = '') +
+                                           '#aa4499', # floodplain - topography
+                                           '#88ccee', # temperature - climate
+                                           '#999932', # hydric soil - soil
+                                           '#999932', # caco3 - soil
+                                           '#999932', # soil % clay - soil
+                                           '#aa4499', # saga wetness index - topography
+                                           '#999932', # available water content - soil
+                                           '#999932', # cation exchange capacity - soil
+                                           '#999932', # soil % sand - soil
+                                           '#aa4499' # slope - topography
+                                           ), name = '') +
     ggplot2::scale_x_discrete(labels = c('totalPPT' = 'Precipitation', 'MeanTEMP' = 'Temperature',
-                                'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
-                                'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
-                                'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
-                                'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
+                                         'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
+                                         'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
+                                         'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
+                                         'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
     ggplot2::theme(axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12))
+                   axis.text = ggplot2::element_text(size = 12))
   
   fSensGibbs |>
     dplyr::select(-c(HydricNo, FloodplainNo, chain, iter)) |>
     tidyr::pivot_longer(Slope:FloodplainYes, names_to = 'covariate', values_to = 'val') |>
     ggplot2::ggplot() +
     ggplot2::geom_violin(ggplot2::aes(x = factor(covariate, levels = c('Slope', 'SAN', 'CEC', 'WAT',
-                                                     'mean.SWI', 'CLA', 'CAC',
-                                                     'HydricYes', 'MeanTEMP',
-                                                     'FloodplainYes', 'totalPPT')),
-                    y = val, color = covariate), show.legend = F) +
+                                                                       'mean.SWI', 'CLA', 'CAC',
+                                                                       'HydricYes', 'MeanTEMP',
+                                                                       'FloodplainYes', 'totalPPT')),
+                                      y = val, color = covariate), show.legend = F) +
     ggplot2::coord_flip() +
     ggplot2::xlab('') + ggplot2::ylab(expression(paste('Sensitivity (',hat(F),')'))) +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#999932', # caco3 - soil
-                                  '#999932', # cation exchange capacity - soil
-                                  '#999932', # soil % clay - soil
-                                  '#aa4499', # floodplain -topography
-                                  '#999932', # hydric soil - soil
-                                  '#aa4499', # saga wetness index - topography
-                                  '#88ccee', # temperature - climate
-                                  '#999932', # soil % sand - soil
-                                  '#aa4499', # slope - topography
-                                  '#88ccee', # precipitation - climate
-                                  '#999932' # available water content - soil
-                                  ), name = '') +
+                                           '#999932', # cation exchange capacity - soil
+                                           '#999932', # soil % clay - soil
+                                           '#aa4499', # floodplain -topography
+                                           '#999932', # hydric soil - soil
+                                           '#aa4499', # saga wetness index - topography
+                                           '#88ccee', # temperature - climate
+                                           '#999932', # soil % sand - soil
+                                           '#aa4499', # slope - topography
+                                           '#88ccee', # precipitation - climate
+                                           '#999932' # available water content - soil
+                                           ), name = '') +
     ggplot2::scale_x_discrete(labels = c('totalPPT' = 'Precipitation', 'MeanTEMP' = 'Temperature',
-                                'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
-                                'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
-                                'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
-                                'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
+                                         'CEC' = 'Cation exchange capacity', 'CLA' = 'Soil % clay',
+                                         'FloodplainYes' = 'Floodplain', 'HydricYes' = 'Hydric soil',
+                                         'CAC' = expression(paste('CaC',O[3])), 'WAT' = 'Available water content',
+                                         'SAN' = 'Soil % sand', 'mean.SWI' = 'Saga Wetness Index', 'Slope' = 'Slope')) +
     ggplot2::theme(axis.title = ggplot2::element_text(size = 14),
-          axis.text = ggplot2::element_text(size = 12))
+                   axis.text = ggplot2::element_text(size = 12))
 }
 
 ## Correlations between taxa
@@ -574,4 +566,4 @@ colnames(upp_mat) <- rownames(upp_mat) <- colnames(corr_mat)
 # Figure 5 & Figure S10
 # Plot with uncertainty
 corrplot::corrplot(corr_mat, lowCI.mat = low_mat, uppCI.mat = upp_mat, plotCI = 'circle',
-         diag = F, type = 'upper', col = rev(pal), tl.col = 'black', tl.cex = 1.4)
+                   diag = F, type = 'upper', col = rev(pal), tl.col = 'black', tl.cex = 1.4)

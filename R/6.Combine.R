@@ -9,10 +9,6 @@
 
 rm(list = ls())
 
-library(dplyr)
-library(ggplot2)
-library(tidyr)
-
 # load R script with modified version of gelman statistic
 source('R/utils.R')
 
@@ -86,11 +82,10 @@ sgibbs <- dplyr::filter(sgibbs, iter > burnin)
 bFacGibbs |>
   dplyr::select(c(colnames(bFacGibbs)[1:20], iter, chain)) |>
   tidyr::pivot_longer(colnames(bFacGibbs)[1:20],
-              names_to = 'beta', values_to = 'estimate') |>
+                      names_to = 'beta', values_to = 'estimate') |>
   ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
   ggplot2::geom_line(show.legend = F) +
   ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
   ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
   ggplot2::theme_minimal() +
   ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
@@ -103,24 +98,22 @@ if(type == 'Reduced_taxa~all_cov_NOASPECT'){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('Reduced_taxa~all_cov_ASPECT', 'All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[21:40], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[21:40],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[21:40], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[21:40],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'Reduced_taxa~all_cov_ASPECT'){
@@ -131,172 +124,158 @@ if(type == 'Reduced_taxa~all_cov_ASPECT'){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[41:60], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[41:60],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[61:80], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[61:80],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[81:100], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[81:100],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[101:120], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[101:120],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[121:140], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[121:140],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[141:160], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[141:160],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[161:180], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[161:180],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[41:60], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[41:60],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[61:80], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[61:80],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[81:100], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[81:100],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[101:120], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[101:120],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[121:140], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[121:140],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[141:160], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[141:160],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[161:180], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[161:180],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'All_taxa~all_cov_NOASPECT'){
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[181:195], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[181:195],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[181:195], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[181:195],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'All_taxa~all_cov_ASPECT'){
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[181:200], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[181:200],
-                      names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[201:220], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[201:220],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[221:240], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[221:240],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[241:260], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[241:260],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bFacGibbs |>
-  dplyr::select(c(colnames(bFacGibbs)[261:270], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bFacGibbs)[261:270],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[181:200], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[181:200],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[201:220], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[201:220],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[221:240], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[221:240],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[241:260], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[241:260],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bFacGibbs |>
+    dplyr::select(c(colnames(bFacGibbs)[261:270], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bFacGibbs)[261:270],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 # Calculate gelman rubin diagnostic
@@ -317,11 +296,10 @@ print(tibble::tibble(bFacGibbs_diag), n = nrow(bFacGibbs_diag))
 bgibbs |>
   dplyr::select(c(colnames(bgibbs)[1:20], iter, chain)) |>
   tidyr::pivot_longer(colnames(bgibbs)[1:20],
-               names_to = 'beta', values_to = 'estimate') |>
+                      names_to = 'beta', values_to = 'estimate') |>
   ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
   ggplot2::geom_line(show.legend = F) +
   ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
   ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
   ggplot2::theme_minimal() +
   ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
@@ -334,38 +312,35 @@ if(type == 'Reduced_taxa~all_cov_NOAPSECT'){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('Reduced_taxa~all_cov_ASPECT', 'All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[21:40], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[21:40],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[21:40], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[21:40],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'Reduced_taxa~all_cov_ASPECT'){
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[41:48], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[41:48],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[41:48], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[41:48],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
@@ -376,120 +351,110 @@ if(type %in% c('All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[61:80], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[61:80],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[81:100], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[81:100],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[101:120], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[101:120],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[121:140], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[121:140],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[141:160], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[141:160],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[161:180], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[161:180],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[61:80], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[61:80],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[81:100], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[81:100],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[101:120], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[101:120],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[121:140], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[121:140],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[141:160], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[141:160],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[161:180], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[161:180],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'All_taxa~all_cov_ASPECT'){
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[181:200], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[181:200],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[201:220], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[201:220],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbs |>
-  dplyr::select(c(colnames(bgibbs)[221:240], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbs)[221:240],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[181:200], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[181:200],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[201:220], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[201:220],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbs |>
+    dplyr::select(c(colnames(bgibbs)[221:240], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbs)[221:240],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 bgibbs_diag <- c()
@@ -508,11 +473,10 @@ print(tibble::tibble(bgibbs_diag), n = nrow(bgibbs_diag))
 bgibbsUn |>
   dplyr::select(c(colnames(bgibbsUn)[1:20], iter, chain)) |>
   tidyr::pivot_longer(colnames(bgibbsUn)[1:20],
-               names_to = 'beta', values_to = 'estimate') |>
+                      names_to = 'beta', values_to = 'estimate') |>
   ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
   ggplot2::geom_line(show.legend = F) +
   ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
   ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
   ggplot2::theme_minimal() +
   ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
@@ -525,21 +489,19 @@ if(type == 'Reduced_taxa~all_cov_NOASPECT'){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('Reduced_taxa~all_cov_ASPECT', 'All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
-bgibbsUn |>
+  bgibbsUn |>
   dplyr::select(c(colnames(bgibbsUn)[21:40], iter, chain)) |>
   tidyr::pivot_longer(colnames(bgibbsUn)[21:40],
-               names_to = 'beta', values_to = 'estimate') |>
+                      names_to = 'beta', values_to = 'estimate') |>
   ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
   ggplot2::geom_line(show.legend = F) +
   ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
   ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
   ggplot2::theme_minimal() +
   ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
@@ -553,133 +515,122 @@ if(type == 'Reduced_taxa~all_cov_ASPECT'){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[41:60], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[41:60],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[61:80], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[61:80],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[81:100], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[81:100],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[101:120], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[101:120],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[121:140], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[121:140],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[141:160], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[141:160],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[161:180], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[161:180],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[41:60], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[41:60],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[61:80], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[61:80],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[81:100], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[81:100],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[101:120], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[101:120],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[121:140], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[121:140],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[141:160], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[141:160],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[161:180], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[161:180],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'All_taxa~all_cov_ASPECT'){
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[181:200], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[181:200],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[201:220], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[201:220],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[221:240], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[221:240],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[181:200], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[181:200],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[201:220], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[201:220],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  bgibbsUn |>
+    dplyr::select(c(colnames(bgibbsUn)[221:240], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[221:240],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 bgibbsUn_diag <- c()
@@ -701,23 +652,22 @@ if(type %in% c('All_taxa~all_cov_NOASPECT', 'Reduced_taxa~all_cov_NOASPECT')){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Sensitivity estimate') +
+    ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('All_taxa~all_cov_ASPECT', 'Reduced_taxa~all_cov_ASPECT')){
-fSensGibbs |>
-  dplyr::select(c(colnames(fSensGibbs)[1:18], iter, chain)) |>
-  tidyr::pivot_longer(colnames(fSensGibbs)[1:18],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Sensitivity Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  fSensGibbs |>
+    dplyr::select(c(colnames(fSensGibbs)[1:18], iter, chain)) |>
+    tidyr::pivot_longer(colnames(fSensGibbs)[1:18],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Sensitivity Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 fSensGibbs_diag <- c()
@@ -739,84 +689,77 @@ if(type %in% c('Reduced_taxa~all_cov_ASPECT', 'Reduced_taxa~all_cov_NOASPECT')){
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
     ggplot2::geom_line(show.legend = F) +
     ggplot2::facet_wrap(~beta, scales = 'free') +
-    ggplot2::theme(legend.position = 'none') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type %in% c('All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOAPSECT')){
-sgibbs |>
-  dplyr::select(c(colnames(sgibbs)[1:20], iter, chain)) |>
-  tidyr::pivot_longer(colnames(sgibbs)[1:20],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-sgibbs |>
-  dplyr::select(c(colnames(sgibbs)[21:40], iter, chain)) |>
-  tidyr::pivot_longer(colnames(sgibbs)[21:40],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-sgibbs |>
-  dplyr::select(c(colnames(sgibbs)[41:60], iter, chain)) |>
-  tidyr::pivot_longer(colnames(sgibbs)[41:60],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-sgibbs |>
-  dplyr::select(c(colnames(sgibbs)[61:80], iter, chain)) |>
-  tidyr::pivot_longer(colnames(sgibbs)[61:80],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-sgibbs |>
-  dplyr::select(c(colnames(sgibbs)[81:100], iter, chain)) |>
-  tidyr::pivot_longer(colnames(sgibbs)[81:100],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
-
-sgibbs |>
-  dplyr::select(c(colnames(sgibbs)[101:120], iter, chain)) |>
-  tidyr::pivot_longer(colnames(sgibbs)[101:120],
-               names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::theme(legend.position = 'none') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  sgibbs |>
+    dplyr::select(c(colnames(sgibbs)[1:20], iter, chain)) |>
+    tidyr::pivot_longer(colnames(sgibbs)[1:20],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  sgibbs |>
+    dplyr::select(c(colnames(sgibbs)[21:40], iter, chain)) |>
+    tidyr::pivot_longer(colnames(sgibbs)[21:40],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  sgibbs |>
+    dplyr::select(c(colnames(sgibbs)[41:60], iter, chain)) |>
+    tidyr::pivot_longer(colnames(sgibbs)[41:60],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  sgibbs |>
+    dplyr::select(c(colnames(sgibbs)[61:80], iter, chain)) |>
+    tidyr::pivot_longer(colnames(sgibbs)[61:80],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  sgibbs |>
+    dplyr::select(c(colnames(sgibbs)[81:100], iter, chain)) |>
+    tidyr::pivot_longer(colnames(sgibbs)[81:100],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+  
+  sgibbs |>
+    dplyr::select(c(colnames(sgibbs)[101:120], iter, chain)) |>
+    tidyr::pivot_longer(colnames(sgibbs)[101:120],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Covariance Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 sgibbs_diag <- c()

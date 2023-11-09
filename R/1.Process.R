@@ -4,10 +4,6 @@
 
 rm(list = ls())
 
-library(dplyr)
-library(tibble)
-library(tidyr)
-
 # Read in file names that we need to loop over
 ## These data can be accessed in the repository listed in
 ## the corresponding publication
@@ -73,9 +69,9 @@ colnames(xdata)[18] <- 'marea'
 # Convert xdata into the correct data types
 xdata <- xdata |>
   dplyr::mutate(uniqueID = as.factor(uniqueID),
-         Hydric = as.factor(Hydric),
-         Floodplain = as.factor(Floodplain),
-         direction = as.factor(direction)) |>
+                Hydric = as.factor(Hydric),
+                Floodplain = as.factor(Floodplain),
+                direction = as.factor(direction)) |>
   # Add unique ID numbers to rownames
   tibble::column_to_rownames(var = 'uniqueID')
 
@@ -87,14 +83,14 @@ ydata <- ydata |>
   dplyr::select(-c(No.data, Water, Unknown.tree, Wet, NA., X88888)) |>
   tibble::column_to_rownames(var = 'uniqueID') |>
   tidyr::replace_na(list(No.tree = 0, Oak = 0, Elm = 0, Hickory = 0,
-                  Ash = 0, Unknown.tree = 0, Poplar = 0, Maple = 0,
-                  Sycamore = 0, Other.hardwood = 0, Mulberry = 0,
-                  Basswood = 0, Walnut = 0, Cherry = 0, Locust = 0,
-                  Hackberry = 0, Willow = 0, Buckeye = 0, Birch = 0,
-                  Black.gum.sweet.gum = 0, Sweet.gum = 0, Black.gum = 0,
-                  Ironwood = 0, Poplar.tulip.poplar = 0, Beech = 0,
-                  Dogwood = 0, Bald.cypress = 0, Cedar.juniper = 0,
-                  Tulip.poplar = 0, Tamarack = 0, Pine = 0, Alder = 0, Chestnut = 0))
+                         Ash = 0, Unknown.tree = 0, Poplar = 0, Maple = 0,
+                         Sycamore = 0, Other.hardwood = 0, Mulberry = 0,
+                         Basswood = 0, Walnut = 0, Cherry = 0, Locust = 0,
+                         Hackberry = 0, Willow = 0, Buckeye = 0, Birch = 0,
+                         Black.gum.sweet.gum = 0, Sweet.gum = 0, Black.gum = 0,
+                         Ironwood = 0, Poplar.tulip.poplar = 0, Beech = 0,
+                         Dogwood = 0, Bald.cypress = 0, Cedar.juniper = 0,
+                         Tulip.poplar = 0, Tamarack = 0, Pine = 0, Alder = 0, Chestnut = 0))
 
 # Remove rows with no information
 zeros <- apply(ydata, 1, sum)

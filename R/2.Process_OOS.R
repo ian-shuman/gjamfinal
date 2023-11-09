@@ -5,10 +5,6 @@
 
 rm(list = ls())
 
-library(dplyr)
-library(tibble)
-library(tidyr)
-
 #### STEP 1 ####
 
 ## This section just formats the data, focusing mainly on
@@ -77,8 +73,8 @@ colnames(xdata)[18] <- 'marea'
 # Convert xdata into the correct data types
 xdata <- xdata |>
   dplyr::mutate(uniqueID = as.factor(uniqueID),
-         Hydric = as.factor(Hydric),
-         Floodplain = as.factor(Floodplain)) |>
+                Hydric = as.factor(Hydric),
+                Floodplain = as.factor(Floodplain)) |>
   # Add unique ID numbers to rownames
   tibble::column_to_rownames(var = 'uniqueID')
 
@@ -92,13 +88,13 @@ ydata <- ydata |>
   # Take out management area
   dplyr::select(-marea.y) |>
   tidyr::replace_na(list(Hackberry = 0, Elm = 0, Oak = 0, Maple = 0,
-                  Ash = 0, Hickory = 0, Willow = 0, Poplar = 0,
-                  No.tree = 0, Walnut = 0, Basswood = 0, Sycamore = 0,
-                  Cherry = 0, Ironwood = 0, Pine = 0, Other.hardwood = 0,
-                  Birch = 0, Mulberry = 0, Buckeye = 0, Locust = 0,
-                  Poplar.tulip.poplar = 0, Beech = 0, Black.gum.sweet.gum = 0,
-                  Dogwood = 0, Black.gum = 0, Bald.cypress = 0,
-                  Sweet.gum = 0, Chestnut = 0))
+                         Ash = 0, Hickory = 0, Willow = 0, Poplar = 0,
+                         No.tree = 0, Walnut = 0, Basswood = 0, Sycamore = 0,
+                         Cherry = 0, Ironwood = 0, Pine = 0, Other.hardwood = 0,
+                         Birch = 0, Mulberry = 0, Buckeye = 0, Locust = 0,
+                         Poplar.tulip.poplar = 0, Beech = 0, Black.gum.sweet.gum = 0,
+                         Dogwood = 0, Black.gum = 0, Bald.cypress = 0,
+                         Sweet.gum = 0, Chestnut = 0))
 
 # Remove rows with no information
 zeros <- apply(ydata, 1, sum)

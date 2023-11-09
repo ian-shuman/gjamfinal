@@ -5,20 +5,10 @@
 
 rm(list = ls())
 
-library(readr)
-library(plyr)
-library(RColorBrewer)
-library(viridis)
-library(stringr)
-library(cowplot)
-library(ggplot2)
-library(tidyr)
-library(dplyr)
-library(tibble)
-
 # Map of study region for plotting
-states <- ggplot2::map_data('state') |>
-  dplyr::filter(region %in% c('indiana', 'illinois'))
+states <- sf::st_as_sf(maps::map('state', region = c('illinois', 'indiana'),
+                                 fill = TRUE, plot = FALSE))
+states <- sf::st_transform(states, crs = 'EPSG:4326')
 
 ### Summary Figures for Y Data
 
@@ -47,7 +37,6 @@ ydata_eco_comb <- ydata_eco |>
   dplyr::left_join(xdata_ind, by = 'id') |>
   dplyr::select(c(Prairie, Savanna, Forest, lat, long))
 
-
 ## Plot
 
 #Plot Ecosystem state
@@ -59,12 +48,12 @@ ydata_eco_comb |>
   ggplot2::scale_color_manual(values = c('Prairie' = '#bb5566', 'Savanna' = '#ddaa34', 'Forest' = '#002a53')) +
   ggplot2::labs(color = 'Ecosystem State') +
   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(shape = 16, size = 7))) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   ggplot2::theme_void() +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Ecosystem distributions')
 
 #Plot Taxa Class
@@ -77,25 +66,25 @@ ydata_all_comb |>
   tidyr::pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Presence') |>
   dplyr::filter(Presence == 1) |>
   dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'No.tree', 'No tree', Taxon),
-         Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
-         Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
-         Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon),
-         Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon)) |>
+                Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black gum/sweet gum', Taxon),
+                Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other conifer', Taxon),
+                Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other hardwood', Taxon),
+                Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/tulip poplar', Taxon)) |>
   ggplot2::ggplot() +
-  ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = Taxon), shape = '.', alpha = 0.7) +
+  ggplot2::geom_jitter(ggplot2::aes(x = long, y = lat, color = Taxon), shape = '.', alpha = 0.7) +
   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(shape = 16, size = 7))) +
   ggplot2::scale_color_manual(values = pal, breaks = c('No tree', 'Oak', 'Hickory',
-                                              'Ash', 'Basswood', 'Beech',
-                                              'Black gum/sweet gum', 'Dogwood',
-                                              'Elm', 'Ironwood', 'Maple', 'Other conifer',
-                                              'Other hardwood', 'Poplar/tulip poplar', 
-                                              'Walnut')) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+                                                       'Ash', 'Basswood', 'Beech',
+                                                       'Black gum/sweet gum', 'Dogwood',
+                                                       'Elm', 'Ironwood', 'Maple', 'Other conifer',
+                                                       'Other hardwood', 'Poplar/tulip poplar', 
+                                                       'Walnut')) +
   ggplot2::theme_void() +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Taxon distributions')
 
 ## Summary Figures for X Data
@@ -105,12 +94,12 @@ slope <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = Slope), shape = '.') +
   ggplot2::scale_color_gradient(low = 'White', high = 'black', 'Slope (°)') +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Slope')
 slope
 
@@ -121,12 +110,12 @@ aspect <- xdata |>
   ggplot2::labs(color = 'Aspect Direction') +
   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(shape = 16, size = 7))) +
   ggplot2::scale_color_manual(values = c('red', 'yellow', 'darkgreen', 'blue', 'grey')) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Aspect')
 aspect
 
@@ -135,12 +124,12 @@ swi <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = mean.SWI), shape = '.') +
   viridis::scale_color_viridis(option = 'viridis', direction = -1, stringr::str_wrap('SAGA Wetness Index', width = 10)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('SAGA Wetness Index')
 swi
 
@@ -151,13 +140,13 @@ CAC <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = CAC), shape = '.') +
   viridis::scale_color_viridis(option = 'viridis', direction = -1) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::labs(color = expression(paste(CaCO['3'], ' (%)'))) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle(expression(CaCO['3']))
 CAC
 
@@ -166,12 +155,12 @@ CEC <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = CEC), shape = '.') +
   viridis::scale_color_viridis(option = 'viridis', direction = -1, stringr::str_wrap('Cation exchange capacity (meq/100g)', width = 14)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Cation exchange capacity')
 CEC
 
@@ -180,12 +169,12 @@ cla <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = CLA), shape = '.') +
   viridis::scale_color_viridis(option = 'viridis', direction = -1, '% clay', limits = c(0, 100)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Soil % clay')
 cla
 
@@ -194,12 +183,12 @@ san <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = SAN), shape = '.') +
   viridis::scale_color_viridis(option = 'viridis', direction = -1, '% sand', limits = c(0, 100)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Soil % sand')
 san
 
@@ -208,12 +197,12 @@ AWC <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = WAT), shape = '.') +
   viridis::scale_color_viridis(option = 'viridis', direction = -1, stringr::str_wrap('Available water content (cm/cm)', width = 14)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Available water content')
 AWC
 
@@ -223,12 +212,12 @@ hydric <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat), shape = '.', color = 'black') +
   ggplot2::scale_fill_manual(values = 'black') +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Presence of hydric soils')
 hydric
 
@@ -238,12 +227,12 @@ flood <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat), shape = '.') +
   ggplot2::scale_fill_manual(values = 'black') +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
-  theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
+  ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Presence of floodplain')
 flood
 
@@ -256,12 +245,12 @@ precip <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = totalPPT), shape = '.') +
   ggplot2::scale_color_distiller(palette = 'Blues', direction = 1, stringr::str_wrap('Mean annual precipitation 1895 - 1925 (mm)', width = 14)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Precipitation')
 precip
 
@@ -270,12 +259,12 @@ temp <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = MeanTEMP), shape = '.') +
   viridis::scale_color_viridis(option = 'magma', stringr::str_wrap('Mean annual temperature 1895 - 1925 (°C)', width = 14)) +
-  ggplot2::geom_polygon(data = states, ggplot2::aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::theme_void() +
-  ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
+  ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+  ggplot2::coord_sf(crs = 'EPSG:4326') +
   ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = 'bold', hjust = 0.5),
-        legend.title = ggplot2::element_text(size = 12),
-        legend.text = ggplot2::element_text(size = 12)) +
+                 legend.title = ggplot2::element_text(size = 12),
+                 legend.text = ggplot2::element_text(size = 12)) +
   ggplot2::ggtitle('Temperature')
 temp
 
