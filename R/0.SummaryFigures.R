@@ -25,6 +25,13 @@ ydata_eco <- ydata
 xdata_ind <- xdata |>
   tibble::rownames_to_column(var = 'id')
 
+# Make into sf object to convert CRS
+xdata_ind2 <- sf::st_as_sf(xdata_ind, coords = c('long', 'lat'))
+# Add current CRS
+sf::st_crs(xdata_ind2) <- 'EPSG:3175'
+# Convert to new CRS
+xdata_ind2 <- sf::st_transform(xdata_ind2, crs = 'EPSG:4326')
+
 # Add lat/long to taxon-level data
 ydata_all_comb <- ydata_all |>
   tibble::rownames_to_column(var = 'id') |>
@@ -93,7 +100,7 @@ ydata_all_comb |>
 slope <- xdata |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = Slope), shape = '.') +
-  ggplot2::scale_color_gradient(low = 'White', high = 'black', 'Slope (°)') +
+  ggplot2::scale_color_gradient(low = 'lightgrey', high = 'black', 'Slope (°)') +
   ggplot2::theme_void() +
   ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
   ggplot2::coord_sf(crs = 'EPSG:4326') +
@@ -109,7 +116,8 @@ aspect <- xdata |>
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = direction), shape = '.') +
   ggplot2::labs(color = 'Aspect Direction') +
   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(shape = 16, size = 7))) +
-  ggplot2::scale_color_manual(values = c('red', 'yellow', 'darkgreen', 'blue', 'grey')) +
+  ggplot2::scale_color_manual(values = c('red', 'yellow', 'darkgreen', 'blue', 'grey'),
+                              breaks = c('E', 'N', 'S', 'W', 'NS')) +
   ggplot2::theme_void() +
   ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
   ggplot2::coord_sf(crs = 'EPSG:4326') +

@@ -17,6 +17,7 @@ states <- sf::st_transform(states, crs = 'EPSG:4326')
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
 # Rename
 ydata_all <- ydata_oos
+
 # Load ecosystem-level ydata & xdata
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
 # Rename
@@ -25,6 +26,23 @@ ydata_eco <- ydata_oos
 # Add corner ID to xdata
 xdata_ind <- xdata_oos |>
   tibble::rownames_to_column(var = 'id')
+
+# Make into sf object to convert CRS
+xdata_ind2 <- sf::st_as_sf(xdata_ind, coords = c('long', 'lat'))
+# Add current CRS
+sf::st_crs(xdata_ind2) <- 'EPSG:3175'
+# Convert to new CRS
+xdata_ind2 <- sf::st_transform(xdata_ind2, crs = 'EPSG:4326')
+
+# Convert back to regular dataframe
+xdata_ind2 <- sfheaders::sf_to_df(xdata_ind2, fill = T) |> 
+  dplyr::rename(long = x,
+                lat = y) |>
+  dplyr::select(colnames(xdata_ind))
+
+# Make sure columns and rows are in the same order
+identical(colnames(xdata_ind), colnames(xdata_ind2))
+identical(xdata_ind$id, xdata_ind2$id)
 
 # Add lat/long to taxon-level data
 ydata_all_comb <- ydata_all |>
@@ -94,7 +112,7 @@ ydata_all_comb |>
 slope <- xdata_oos |>
   ggplot2::ggplot() +
   ggplot2::geom_point(ggplot2::aes(x = long, y = lat, color = Slope), shape = '.') +
-  ggplot2::scale_color_gradient(low = 'White', high = 'black', 'Slope (°)') +
+  ggplot2::scale_color_gradient(low = 'lightgrey', high = 'black', 'Slope (°)') +
   ggplot2::theme_void() +
   ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
   ggplot2::coord_sf(crs = 'EPSG:4326') +

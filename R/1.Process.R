@@ -58,6 +58,22 @@ ydata <- ydata |>
 full_data <- xdata |>
   dplyr::full_join(ydata, by = 'uniqueID')
 
+# Make into sf object
+full_data2 <- sf::st_as_sf(full_data, coords = c('long', 'lat'))
+# Add current CRS
+sf::st_crs(full_data2) <- 'EPSG:3175'
+# Change CRS to EPSG4326
+full_data2 <- sf::st_transform(full_data2, crs = 'EPSG:4326')
+# Change back to regular dataframe
+full_data2 <- sfheaders::sf_to_df(full_data2, fill = TRUE) |>
+  dplyr::rename(long = x,
+                lat = y) |>
+  dplyr::select(colnames(full_data))
+
+# Make sure columns and rows are in the same order still
+identical(colnames(full_data), colnames(full_data2))
+identical(full_data$uniqueID, full_data2$uniqueID)
+
 # Separate xdata and ydata
 # This is done to ensure that both dataframes are in the
 # same order for GJAM
