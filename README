@@ -2,7 +2,6 @@ This repo contains code written by AM Willson and I Shuman for Shuman et al. (in
 
 **Data** and **intermediate outputs** from processing steps required to run the analysis code are available in the GJAMDATA subdirectory. **Outputs** of the GJAM model are available in the out subdirectory. Any data or outputs not included in the repository are available upon request at this time. Processing for the data inputs to this repository are available from the following repositories:
   -https://github.com/ian-shuman/GJAMCovariates.git: produces point-level reconstructions of environmental covariates
-  -https://github.com/ian-shuman/PLS_products.git: provides point-level reconstructions of vegetation distributions
 
 The bulk of the repository is housed in the R subdirectory. The scripts within the R subdirectory are ordered according to the sequence of steps that should be taken to recreate the anlaysis. Descriptions of each step are as follows, and should be run in the following order:
 
