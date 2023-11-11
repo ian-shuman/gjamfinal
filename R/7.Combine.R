@@ -605,7 +605,8 @@ if(type == 'All_taxa~all_cov_ASPECT'){
     tidyr::pivot_longer(colnames(bgibbsUn)[181:200],
                         names_to = 'beta', values_to = 'estimate') |>
     ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-    ggplot2::geom_line(show.legend = F) +ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
     ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
     ggplot2::theme_minimal() +
     ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
