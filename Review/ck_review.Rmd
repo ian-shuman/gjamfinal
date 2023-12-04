@@ -27,9 +27,12 @@ Produces summary figures of the input data for the supplement (response and driv
 1. yes
 2. called via load(), no outputs
 3. Currently calls 'GJAMDATA/processed_xydata_2.RData', which is not in the readme as an output of 1.Process.R
+  * **AW**: This is correct. README has been updated to say that the figures are made with data saved in step 4.
 4. yes
 5. runs and reproduces well, but has what appears to be plotting artifacts when I run it
+  * **AW**: Plots are correct, the data are just irregular. White areas refer to where surveyors did not match up, the land was already settled, or the boundaries of managemnet areas did not overlap
 6. it takes the output from 1.Process.R and formats it for plotting and plots each covariate, yes
+  * **AW**: no, from step 4
 ## 0.SummaryFigures_oos.R
 produces summary figures for the oos data
 1. yes
@@ -67,6 +70,7 @@ Reduces the dimensionality of the dataset by lumping certain taxa
 1. yes
 2. yes, load() and save()
 3. the output file is saved under a temporary numbered version (as the comment indicates) 'GJAMDATA/processed_xydata_2.RData', not the final file name that is stated in the readme
+  * **AW**: The file name is correct, but the comment has been updated to make this more clear
 4. yes
 5. yes
 6. yes
@@ -75,6 +79,7 @@ Converts composition to ecosystem state (forest, savanna, prairie)
 1. yes
 2. yes, load() and save()
 3. temporary output named in this script as well, does not match README
+  * **AW**: Typo and comment fixed to eliminate confusion because the output does match the README
 4. yes
 5. yes
 6. yes, other than mislabeled output
@@ -104,6 +109,7 @@ Combining replicate MCMC chains into a usable format for analysis
 4. yes
 5. yes
 6. produces trace plots and convergence diagnostics for the chains, almost all converged but some intercepts
+  * **AW**: Non-convergence of some intercepts was not a big concern as the intercepts were never interpreted and the non-convergence does not appear to have strongly affected prediction
 ## 8.Visualize.R
 Produces figures for analysis
 1. yes
@@ -123,6 +129,7 @@ uses one of the model runs (selected by commenting line) to predict out of sampl
 ## 9.Predict_oos_conditional.R
 1. yes
 2. yes, for loop skipped bc it took a long time, data loaded for analysis
+  * **AW**: intermediate output provided to allow user/reviewer to skip the loop
 3. yes
 4. yes
 5. yes

@@ -11,7 +11,7 @@
 
 
 
-<title>README2</title>
+<title>README</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -429,7 +429,7 @@ Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData</li>
 <li>out: <strong>Outputs</strong> of the GJAM model are available in
 this directory. Any data or outputs not included in the repository are
 available upon request at this time. Processing for the data inputs to
-this repository are avaialble from the following repository:
+this repository are available from the following repository:
 <ul>
 <li><a href="https://github.com/ian-shuman/GJAMCovariates.git" class="uri">https://github.com/ian-shuman/GJAMCovariates.git</a>:
 produces point-level reconstructions of environmental covariates</li>
@@ -439,22 +439,627 @@ scripts within the R subdirectory are ordered according to the sequence
 of steps that should be taken to recreate the analysis. Descriptions of
 each step are presented in the following subsection, and should be run
 in the order presented, except step 0 must follow step 1.</li>
+<li>Review: Documents related to an code review conducted prior to
+submitting the associated manuscript for publication. The documents are
+as follows:
+<ul>
+<li>Code Review Checklist - GJAM - AW-CK - Notre Dame Checklist.pdf: A
+filled out rubric pertaining to reviewing the code, workflow, and
+statistical methodology of the manuscript associated with this paper.
+The checklist was jointly written by current members of the McLachlan
+Lab at the University of Notre Dame as of December 2023 (Jason
+McLachlan, Alyssa Willson, Jody Peters, Cazimir Kowalski, Nate Kroeze,
+Hannah O’Grady). The “author checklist” and “author notes” sections were
+filled out by Alyssa Willson and the “reviewer checklist” and “reviewer
+notes” were filled out by Cazimir Kowalski.</li>
+<li>ck_review.Rmd: additional notes related to the code review conducted
+by C. Kowalski</li>
+</ul></li>
 </ul>
 <div id="code-organization" class="section level2">
 <h2>Code organization</h2>
 <ul>
 <li><p><strong>0.SummaryFigures.R</strong>: This script produces the
 figures given in the supplement of Shuman et al. (in prep) that
-summarize the response and drive varaibles in space</p>
+summarize the response and drive variables in space</p>
 <ul>
 <li><p>Inputs: Environmental covariates (xdata), and community- and
 biome-level response data (ydata) from the GJAMDATA/ directory.
 <strong>The inputs that are loaded at the top of the script are saved
-from step 1. Step 0 is the only out-of-sequence step because it is not
+from step 4. Step 0 is the only out-of-sequence step because it is not
 part of the analysis and only serves as data (not analysis)
 visualization</strong></p></li>
 <li><p>Outputs: None saved. Figures of reconstructed vegetation and
 environmental covariates produced</p></li>
+</ul></li>
+<li><p><strong>0.SummaryFigures_OOS.R</strong>: This script produces the
+figures given in the supplement of Shuman et al. (in prep) that
+summarize the response and driver variables of withheld data for
+performing out-of-sample validation. The script is an exact mirror of
+0.SummaryFigures.R but for out-of-sample validation data</p>
+<ul>
+<li><p>Inputs: Community- and biome-level out-of-sample data from the
+GJAMDATA/Withheld for Validation/ subdirectory. <strong>The inputs that
+are loaded at the top of the script are saved from step 5. Step 0 is the
+only out-of-sequence step because it is not part of the analysis and
+only serves as data (not analysis) visualization</strong></p></li>
+<li><p>Outputs: None saved. Figures of reconstructed vegetation and
+environmental covariates produced</p></li>
+</ul></li>
+<li><p><strong>1.Process.R</strong>: Takes tables of response (ydata)
+and driver (xdata) variables and formats them according to the format
+required by the <code>gjam()</code> function. The script conducts simple
+data checks before saving the output in an RData file.</p>
+<ul>
+<li>Inputs: xdata (drivers) and ydata (response variables) from CSVs
+specific to each management area as described in the methods of Shuman
+et al. (in prep) and in the Input Data section of the README</li>
+<li>Outputs: GJAMDATA/processed_xydata.RData: a RData file with the
+xdata and ydata databases with all management areas combined
+<ul>
+<li>xdata: 78224 observations of 17 variables
+<ul>
+<li>long: longitude (decimal degrees, EPSG4326)</li>
+<li>lat: latitude (decimal degrees, EPSG4326)</li>
+<li>Slope: topographic slope, as defined in Input data</li>
+<li>Aspect: topographic aspect, as defined in Input data</li>
+<li>CAC: soil CaCO3 concentration, as defined in Input data</li>
+<li>CEC: cation exchange capacity, as defined in Input data</li>
+<li>CLA: soil clay content, as defined in Input data</li>
+<li>SAN: soil sand content, as defined in Input data</li>
+<li>SIL: soil silt content, as defined in Input data</li>
+<li>WAT: soil available water content, as defined in Input data</li>
+<li>mean.SWI: SAGA Wetness Index, as defined in Input data</li>
+<li>Hydric: presence of hydric soils, as defined in Input data</li>
+<li>Floodplain: presence of floodplain, as defined in Input data</li>
+<li>totalPPT: mean total annual precipitation, as defined in Input
+data</li>
+<li>MeanTEMP: mean annual temperature, as defined in Input data</li>
+<li>direction: cardinal direction of aspect, as defined in Input
+data</li>
+<li>marea: nickname of the management area derived from the file names
+of the inputs</li>
+</ul></li>
+<li>ydata: 78225 observations of 32 variables
+<ul>
+<li>each column contains presence or absence of a given taxon at a given
+corner. No.tree as defined above is the only non-taxon column</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>2.Process_OOS.R</strong>: This script is identical to
+1.Process.R but formats the out-of-sample data that will be used to
+validate the model in step 8.</p>
+<ul>
+<li>Inputs: xdata (drivers) and ydata (response variables) from CSVs in
+the GJAMDATA/Withheld for Validation/ subdirectory specific to each
+management area as described in the methods of Shuman et al. (in prep).
+Structure is explained in the section Input data of the README.</li>
+<li>Outputs: GJAMDATA/Withheld for
+Validation/validation_processed_xydata.RData: a RData file with the
+xdata_oos and ydata_oos (oos denoting out-of-sample data) dataframes
+with all management areas combined
+<ul>
+<li>xdata_oos: 24699 out-of-sample observations of 17 variables.
+Variables as described in 1.Process.R</li>
+<li>ydata_oos: 24699 out-of-sample observations of 28 variables.
+Variables as described in 1.Process.R. The fewer number of variables is
+because some rare taxa that are present in the in-sample data and later
+combined into “other hardwood” and “other conifer” categories are
+absent</li>
+</ul></li>
+</ul></li>
+<li><p><strong>3.Combine_marea.R</strong>: This step takes the output of
+2.Process_OOS.R and matches each management area from the out-of-sample
+data with the nearest in-sample management area using Euclidean
+distance. This is necessary because the out-of-sample prediction must
+have only random effect groups that were present in the in-sample
+dataset.</p>
+<ul>
+<li>Inputs:
+<ul>
+<li>GJAMDATA/Withheld for
+Validation/validation_processed_xydata.RData</li>
+<li>GJAMDATA/processed_xydata.RData</li>
+</ul></li>
+<li>Outputs:
+<ul>
+<li>GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea.RData
+<ul>
+<li>Identical to the xdata_oos and ydata_oos in GJAM/Withheld for
+Validation/validation_processed_xydata.RData except that the contents of
+the marea (management area) column were replaced with management areas
+in the in-sample data</li>
+<li>type: new column denoting that this is out-of-sample data</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>4.Reduce.R</strong>: This script takes the output of
+1.Process.R and reduces the number of individual taxa by grouping black
+gum, sweet gum, and black gum/sweet gum; poplar, tulip poplar, and
+poplar/tulip poplar; and any uncommon taxon with either other hardwood
+or other conifer. This reduces the dimensionality of the response
+variables to reduce the probability of overfitting and improve parameter
+inference.</p>
+<ul>
+<li>Inputs:
+<ul>
+<li>GJAMDATA/processed_xydata.RData</li>
+</ul></li>
+<li>Outputs:
+<ul>
+<li>GJAMDATA/processed_xydata_2.RData
+<ul>
+<li>xdata: 78224 observations of 17 variables. Identical to the xdata
+output saved in GJAMDATA/processed_xydata.RData. Saved again here for
+convenience down the pipeline</li>
+<li>ydata: 78224 observations of 15 variables. Presence or absence (1/0)
+of each taxonomic group
+<ul>
+<li>No.tree: corners where no trees were observed, as defined in Input
+data</li>
+<li>Poplar.tulip.poplar: presence/absence of taxonomic groups poplar,
+tulip poplar, and poplar/tulip poplar in the original data</li>
+<li>Black.gum.sweet.gum: presence/absence of taxonomic groups black gum,
+sweet gum, and black gum/sweet gum in the original data</li>
+<li>Other.conifer: presence/absence of taxonomic groups bald cypress,
+pine, tamarack, cedar/juniper in the original data</li>
+<li>Other.hardwood: presence/absence of taxonomic groups birch, locust,
+willow, cherry, sycamore, buckeye, hackberry, mulberry, other.hardwood,
+alder, and chestnut in the original data</li>
+<li>All other columns as described in ydata in Input data</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>4.Reduce_ecosystem.R</strong>: This script takes the
+output of 4.Reduce.R and further reduces the dimensions of the response
+variable to include only three ecosystem states: prairie, savanna, and
+forest. This allows an analysis of both biome-level and community-level
+drivers of vegetation distributions.</p>
+<ul>
+<li>Inputs: GJAMDATA/processed_xydata_2.RData</li>
+<li>Outputs: GJAMDATA/processed_xydata_2_ecosystem.RData
+<ul>
+<li>xdata: 78224 observations of 17 variables. Identical to the xdata
+output saved in GJAMDATA/processed_xydata.RData. Saved again here for
+convenience down the pipeline</li>
+<li>ydata: 78224 observations of 3 variables. Presence or absence (1/0)
+of each biome
+<ul>
+<li>Prairie: present at any corner only including presence of No.tree in
+the original data</li>
+<li>Savanna: present at any corner including presence of oak and/or
+hickory and no other tree taxa in the original data</li>
+<li>Forest: present at any corner including any tree taxon other than
+exclusively oak and/or hickory</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>5.Reduce_OOS.R</strong>: This script is identical to
+4.Reduce.R for the out-of-sample data. The script takes the output of
+3.Combine_marea.R as the input</p>
+<ul>
+<li>Inputs: GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea.RData</li>
+<li>Outputs: GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced.RData
+<ul>
+<li>xdata_oos: 24699 observations of 18 variables. Identical to the
+xdata saved in GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea.RData. Saved again for
+convenience down the pipeline</li>
+<li>ydata_oos: 24699 observations of 15 variables. Presence/absence
+(1/0) of each taxonomic group
+<ul>
+<li>No.tree: corners where no trees were observed, as defined in Input
+data</li>
+<li>Poplar.tulip.poplar: presence/absence of poplar, tulip poplar, and
+poplar/tulip poplar as defined above for in-sample data</li>
+<li>Black.gum.sweet.gum: presence/absence of black gum, sweet gum, black
+gum/sweet gum as defined above for in-sample data</li>
+<li>Other.conifer: presence/absence of taxonomic groups bald cypress,
+pine, tamarack, cedar/juniper as defined above for in-sample data</li>
+<li>Other.hardwood: presence/absence of taxonomic groups birch, locust,
+willow, cherry, sycamore, buckeye, hackberry, mulberry, other.hardwood,
+alder, and chestnut as defined above for in-sample data</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>5.Reduce_OOS_ecosystem.R</strong>: This script is
+identical to 4.Reduce_ecosystem.R for the out-of-sample data. It takes
+the output of 5.Reduce_OOS.R as the input</p>
+<ul>
+<li>Inputs: GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced.RData</li>
+<li>Outputs: GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData
+<ul>
+<li>xdata_oos: 24699 observations of 18 variables. Identical to the
+xdata saved in GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea.RData. Saved again for
+conveniences down the pipeline</li>
+<li>ydata_oos: 24699 observations of 3 variables. Presence/absence (1/0)
+of each biome
+<ul>
+<li>Prairie: present at any corner only including presence of No.tree in
+the original dataset</li>
+<li>Savanna: present at any corner including presence of oak and/or
+hickory but not any other tree taxon in the original dataset</li>
+<li>Forest: present at any corner including any tree taxon other than
+exclusively oak and/or hickory</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>6.Run</strong>: This step is a folder with the run
+scripts for each of the four simulation types. There are four
+subdirectories of 6.Run, each of which contains both the R script and a
+job submission script for running the simulations on the University of
+Notre Dame cluster computing system. The R scripts are set up in the
+same way and differ in two ways: (1) the data files that are called as
+inputs and (2) the covariates that are named as independent variables in
+the gjam formula. Each job should be submitted three to four times for
+four independent MCMC chains. The jobs differ in two ways: using the
+community- or biome-level response variables (All_taxa vs Reduced_taxa)
+and including or not including aspect as an environmental covariate
+(ASPECT vs NOASPECT)</p>
+<ul>
+<li>Sub directories:
+<ul>
+<li>All_taxa~all_cov_ASPECT
+<ul>
+<li>Input: GJAMDATA/processed_xydata_2.RData</li>
+<li>Output:
+<ul>
+<li>out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData</li>
+<li>out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_2.RData</li>
+<li>out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_3.RData</li>
+<li>out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_4.RData</li>
+</ul></li>
+</ul></li>
+<li>All_taxa~all_cov_NOASPECT
+<ul>
+<li>Input: GJAMDATA/processed_xydata_2.RData</li>
+<li>Output:
+<ul>
+<li>out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData</li>
+<li>out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOAPSECT_2.RData</li>
+<li>out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOAPSECT_3.RData</li>
+</ul></li>
+</ul></li>
+<li>Reduced_taxa~all_cov_ASPECT
+<ul>
+<li>Input: GJAMDATA/processed_xydata_2_ecosystem.RData</li>
+<li>Output:
+<ul>
+<li>out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData</li>
+<li>out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_2.RData</li>
+<li>out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_3.RData</li>
+<li>out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_4.RData</li>
+</ul></li>
+</ul></li>
+<li>Reduced_taxa~all_cov_NOASPECT
+<ul>
+<li>Input: GJAMDATA/processed_xydata_2_ecosystem.RData</li>
+<li>Output:
+<ul>
+<li>out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData</li>
+<li>out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_2.Rdata</li>
+<li>out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_3.RData</li>
+<li>out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_4.RData</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li>The formula includes all covariates: mean precipitation, mean
+temperature, topographic slope, SAGA Wetness Index, presence of hydric
+soils, presence of a floodplain, soil CaCO3 concentration, cation
+exchange capacity, soil sand content, soil clay content, soil water
+content, and topographic direction (for ASPECT runs). The response
+variable is the joint presence or absence of each taxon (All_taxa) or
+biome (Reduced_taxa)</li>
+<li>All the submit.sh files have identical specifications as follows:
+<ul>
+<li>-M denotes which email information about the status of the job
+should go to</li>
+<li>-m abe specifies to send emails about the job being aborted,
+beginning, and ending</li>
+<li>-pe smp 10 denotes submitting the job to 10 parallel cores on a
+single node</li>
+<li>-q long specifies the job should be submitted to the long queue</li>
+<li>-N specifies the name of the job</li>
+</ul></li>
+</ul></li>
+<li><p><strong>7.Combine.R</strong>: GJAM only allows for one chain to
+be run at a time. Given that the model is a Bayesian model relying on
+MCMC, multiple chains are useful for estimating the full uncertainty of
+the model and to reduce the impact of initial chain values on inference.
+We therefore ran the model 3-4 times using identical specifications in
+each of the simulations given in 6.Run and we then combine the chains
+into a more usable format here.</p>
+<ul>
+<li>Inputs: individual files within one of the subfolders of out/
+specific to the type of model run. The type being loaded can be changed
+by modifying the <code>type</code> parameter using the four available
+options specified at the top of the script. The input is always the
+entire global environment saved for each run of GJAM, but the specific
+input depends on the type of run you want to manipulate</li>
+<li>Outputs: RData object named combined.RData in the specified
+subdirectory of the out/ folder. The subdirectory is specified in the
+<code>type</code> parameter at the beginning of the script. Each
+combined.RData object contains the following:
+<ul>
+<li>bFacGibbs: dataframe with 3200 samples. Number of columns differs
+according to the number of parameters in the specified model. Columns
+are beta coefficient estimates standardized for X with correlation scale
+for W. See Clark et al. (2017) for more information. Includes intercepts
+and coefficient estimates for “yes” and “no” of binary variables (hydric
+and floodplain). Also includes chain (1-4) and iter (201-1000) columns
+for the MCMC chain and MCMC iteration. iter starts at 201 because
+burn-in has already been removed.</li>
+<li>bgibbs: dataframe with 3200 samples. Number of columns differs
+according to the number of parameters in the specified model. Columns
+are beta coefficient estimates standardized for X. See Clark et
+al. (2017) for more information. Includes intercepts but only “yes” of
+binary variables (hydric and floodplain). Also includes chain (1-4) and
+iter (201-1000) columns for the MCMC chain and MCMC iteration. iter
+starts at 201 because burn-in has already been removed.</li>
+<li>bgibbsUn: dataframe with 3200 samples. Number of columns differs
+according to the number of parameters in the specified model. Columns
+are unstandardized beta coefficient estimates. Includes intercepts but
+only “yes” of binary variables (hydric and floodplain). Also includes
+chain (1-4) and iter (201-1000) columns for the MCMC chain and MCMC
+iteration. iter starts at 201 because burn-in has already been
+removed.</li>
+<li>fSensGibbs: dataframe with 3200 samples. Number of columns differs
+according to the number of parameters in the specified model. Columns
+are the covariance between X and the responses they elicit from Y. See
+Clark et al. (2017) for more information. Also includes chain (1-4) and
+iter (201-1000) columns for the MCMC chain and MCMC iteration. iter
+starts at 201 because burn-in has already been removed.</li>
+<li>sgibbs: dataframe with 3200 samples. Number of columns differs
+according to the number of parameters in the specified model. Columns
+are covariances between response variables. See Clark et al. (2017) for
+more information. Also includes chain (1-4) and iter (201-1000) columns
+for the MCMC chain and MCMC iteration. iter starts at 201 because
+burn-in has already been removed.</li>
+</ul></li>
+</ul></li>
+<li><p><strong>8.Visualize.R</strong>: This script produces figures used
+in Shuman et al. (in prep) for both community-level and biome-level
+runs, depending on the input called into the script and the designation
+of “all” (community-level) or “reduced” (biome-level) at the beginning
+of the script. The script uses the output of 7.Combine.R, but the
+specific input depends on the simulation of interest.</p>
+<ul>
+<li>Inputs: combined.RData file from the specified subdirectory of the
+out/ folder. The file is specified by modifying line 11.</li>
+<li>Outputs: none. Figures produced</li>
+</ul></li>
+<li><p><strong>9.Predict_OOS.R</strong>: This script uses the model fit
+of one of the simulations from 6.Run to predict the out-of-sample data.
+The type of prediction here predicts the response variable only from the
+environmental covariate sand does not take into account the covariance
+between taxa or biomes. Visualization is included in the same
+script.</p>
+<ul>
+<li>Inputs:
+<ul>
+<li>The global environment RData file for the first chain of any of the
+four model runs. The first chain is specified as follows, using the
+All_taxa~all_cov_ASPECT model run type as an example:
+out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RD ta</li>
+<li>The out-of-sample data that fits the model run type. One of the
+following:
+<ul>
+<li>GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced.R ata: for
+All_taxa model runs</li>
+<li>GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced_e
+ecosystem.RData for Reduced_taxa model runs</li>
+</ul></li>
+</ul></li>
+<li>Outputs: none saved. This is the last step, so all analyses of the
+validation are done in the same step</li>
+</ul></li>
+<li><p><strong>9.Predict_OOS_conditional.R</strong>: This script is
+similar to 9.Predict_OOS.R and uses the same inputs. The difference is
+that the type of prediction implemented in this script accounts for the
+covariance between taxa or ecosystem types, which we hypothesize will
+improve prediction.</p>
+<ul>
+<li>Inputs:
+<ul>
+<li>The global environment RData file for the first chain of any of the
+four model runs. The first chain is specified as follows, using the
+All_taxa~all_cov_ASPECT model run type as an example:
+out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData</li>
+<li>The out-of-sample data that fits the model run type. One of the
+following
+<ul>
+<li>GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced.R ata: for
+All_taxa model runs</li>
+<li>GJAMDATA/Withheld for
+Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.Rdata
+for Reduced_taxa model runs</li>
+</ul></li>
+</ul></li>
+<li>Outputs: the validation is computationally intensive, so the
+out-of-sample prediction for the All_taxa~all_cov_NOASPECT and
+Reduced_taxa~all_cov_NOASPECT model run type are saved as intermediate
+outputs as follows:
+<ul>
+<li>out/cond_pred_all_taxa.RData: conditional prediction with All_taxa
+model run type</li>
+<li>out/cond_pred_reduced_taxa.RData: conditional prediction with
+Reduced_taxa model run type</li>
+</ul></li>
+</ul></li>
+<li><p><strong>utils.R</strong>: This script contains utility functions
+for the code. Specifically, there is a function for manually calculating
+the Gelman Rubin diagnostic for assessing chain convergence because our
+output is not in the proper format to use the default functions
+available in R. I additionally removed any identical chains (usually
+2/4) from the output prior to calculating the diagnostic statistic. The
+identical chains are an artifact of the gjam function and cannot be
+avoided to the authors’ knowledge. Removing the identical chains offers
+a more conservative view of chain convergence.</p></li>
+</ul>
+</div>
+</div>
+<div id="input-data" class="section level1">
+<h1>Input data</h1>
+<div id="xdata" class="section level2">
+<h2>xdata</h2>
+<ul>
+<li>15 in-sample and 7 out-of-sample CSVs. Each CSV contains point-level
+(corner) data for one management area
+<ul>
+<li>GJAMDATA/X/IL_Mixed1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_Prairie1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_Prairie2_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_Prairie3_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_River2_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_Shawnee_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_Small1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_Small3_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IL_StudyArea_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IN_Dunes_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IN_Forest1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IN_Forest2_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IN_HoosierNorth_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IN_HoosierSouth_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/X/IN_NE_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IL_Forest1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IL_River1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IL_Small2_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IN_Forest3_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IN_Forest4_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IN_Indianapolis_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/X/IN_Prairie1_X_Ian10mDataStructure_RandomEffects_Fixed.csv</li>
+</ul></li>
+<li>Dimensions:
+<ul>
+<li>Rows correspond to individual corners in the PLS dataset. Each CSV
+has a different number of rows corresponding to the size of the
+management area</li>
+<li>Columns are as follows:
+<ul>
+<li>uniqueID: an identifier for each corner within a given dataframe.
+When binded together, the uniqueID must be combined with the management
+area to get a unique corner identifier across management areas</li>
+<li>x: easting (m)</li>
+<li>y: northing (m)</li>
+<li>long: longitude (decimal degrees, EPSG:4326)</li>
+<li>lat: latitude (decimal degrees, EPSG:4326)</li>
+<li>Slope: topographic slope (m)</li>
+<li>Aspect: topographic aspect (degrees). NA indicates slope of 0, when
+aspect cannot be calculated</li>
+<li>CAC: soil CaCO3 concentration (%)</li>
+<li>CEC: cation exchange capacity (meq/100g)</li>
+<li>CLA: soil clay content (%)</li>
+<li>SAN: soil sand content (%)</li>
+<li>SIL: soil silt content (%)</li>
+<li>WAT: soil available water content (cm)</li>
+<li>mean.SWI: SAGA Wetness Index (unit area/radian)</li>
+<li>Hydric: presence or absence of hydric soils (1/0 binary)</li>
+<li>Floodplain: presence or absence of floodplain (1/0 binary)</li>
+<li>totalPPT: mean total annual precipitation (mm)</li>
+<li>MeanTEMP: mean annual temperature (deg F)</li>
+<li>direction: cardinal direction of aspect. Simplification of aspect to
+improve use of aspect with the high number of points with aspect NA
+because slope = 0 (N = north, S = south, E = east, W = west, NS = no
+slope)</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+<div id="ydata" class="section level2">
+<h2>ydata</h2>
+<ul>
+<li>15 in-sample and 7 out-of-sample CSVs corresponding to the xdata
+files. Each file contains point-level vegetation data
+<ul>
+<li>GJAMDATA/Y/IL_Mixed1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_Prairie2_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_River2_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_Small1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_StudyArea_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IN_Forest1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IN_HoosierNorth_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IN_NE_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_Prairie1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_Prairie3_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_Shawnee_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IL_Small3_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IN_Dunes_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IN_Forest2_Y_DataStructure.csv</li>
+<li>GJAMDATA/Y/IN_HoosierSouth_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IL_Forest1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IL_Small2_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IN_Forest4_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IN_Prairie1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IL_River1_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IN_Forest3_Y_DataStructure.csv</li>
+<li>GJAMDATA/Withheld for
+Validation/Y/IN_Indianapolis_Y_DataStructure.csv</li>
+</ul></li>
+<li>Dimensions:
+<ul>
+<li>Rows correspond to individual corners in the PLS dataset. Each CSV
+has a different number of rows corresponding to the size of the
+management area</li>
+<li>Columns are as follows:
+<ul>
+<li>uniqueID: an identifier for each corner within a given dataframe.
+When binded together, the uniqueID must be combined with the management
+area to get a unique corner identifier across management areas</li>
+<li>chainstree, chainstree2, chainstree3, chainstree4: distance of each
+tree at a given corner to the corner. There can be between 1 and 4 trees
+at a given corner, so chainstree2-chainstree4 can be NA. Units are
+chains. Currently not used in the analysis</li>
+<li>No.tree, Oak, Elm, Hickory, Ash, Unknown.tree, Poplar, Maple,
+Sycamore, Other.hardwood, Mulberry, Basswood, Walnut, Cherry, Locust,
+No.data, Hackberry, Willow, Buckeye, Birch, Black.gum.sweet.gum, Water,
+Sweet.gum, Black.gum, Ironwood, Poplar.tulip.poplar, Beech, Dogwood,
+Wet, NA.: Columns indicating the presence or absence of each taxon/group
+at each corner (1/0 presence/absence). Columns that are not specific to
+a taxonomic group are as follows:
+<ul>
+<li>No.tree: indicates no tree was present within a given distance of
+the corner</li>
+<li>Unknown.tree: the surveyor’s notes were impossible to read to
+determine the tree taxon present at the site. Removed during data
+processing</li>
+<li>No.data: No data available at a given corner. Removed during data
+processing</li>
+<li>Water: The corner is within a body of water. Removed during data
+processing</li>
+<li>Wet: The corner is in a wetland area. Removed during data
+processing</li>
+<li>NA: Miscellaneous column removed during data processing</li>
+</ul></li>
+<li>No.tree_dist, Oak_dist, Elm_dist, Hickory_dist, Ash_dist,
+Unknown.tree_dist, Poplar_dist, Maple_dist, Sycamore_dist,
+Other.hardwood_dist, Mulberry_dist, Basswood_dist, Walnut_dist,
+Cherry_dist, Locust_dist: distances (in chains) of the recorded tree of
+each taxon to the corner. Currently not used in the analysis</li>
+</ul></li>
 </ul></li>
 </ul>
 </div>

@@ -41,4 +41,5 @@ zeros <- which(zeros != 1)
 # Good to go
 ydata <- new.ydata
 
+# Save intermediate output
 save(ydata, xdata, file = 'GJAMDATA/processed_xydata_2_ecosystem.RData')

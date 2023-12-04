@@ -59,5 +59,5 @@ zeros <- which(zeros == 0)
 
 ydata <- new.ydata
 
-# I'm going to save this in a different object for now
+# Save intermediate output
 save(xdata, ydata, file = 'GJAMDATA/processed_xydata_2.RData')
