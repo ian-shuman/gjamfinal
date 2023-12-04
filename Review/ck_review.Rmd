@@ -1,0 +1,131 @@
+---
+title: "code_review"
+author: "c kowalski"
+date: "2023-11-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Hypotheses:
+H0: Environmental covariates related to climate, topography, and soil conditions sufficiently explain variation in community- and biome-level vegetation distribution in the Upper Midwest U.S.
+
+H1: Residual covariance between taxa and biomes improve prediction of vegetation distributions over prediction accuracy using environmental covariates alone
+
+Questions for scripts:
+1. does each file have a description?
+2. are all inputs and outputs indicated at the beginning and end?
+3. do they match the readme?
+4. is the code commented?
+5. does it run and reproduce results?
+6. does it do what it says it does?
+
+Script by script review
+## 0.SummaryFigures.R
+Produces summary figures of the input data for the supplement (response and drive variables in space)
+1. yes
+2. called via load(), no outputs
+3. Currently calls 'GJAMDATA/processed_xydata_2.RData', which is not in the readme as an output of 1.Process.R
+4. yes
+5. runs and reproduces well, but has what appears to be plotting artifacts when I run it
+6. it takes the output from 1.Process.R and formats it for plotting and plots each covariate, yes
+## 0.SummaryFigures_oos.R
+produces summary figures for the oos data
+1. yes
+2. input: load('validation_processed_xydata_fixmarea_reduced.RData') and ecosystem data, no outputs
+3. yes, uses output from 2.Process_oos.R
+4. yes
+5. yes, produces plots analagous to 0.SummaryFigures.R
+6. yes
+## 1.Process.R
+processes the data into a format appropriate for input to gjam
+1. yes
+2. inputs read in from list of file names in the x and y folders, produces .Rdata file
+3. yes, dimensions and contents of output matches README
+4. yes
+5. yes, produces the .Rdata file
+6. yes, formats data and produces 'processed_xydata.RData'.  
+## 2.Process_oos.R
+Processes the out of sample data for validation
+1. yes
+2. inputs loaded from filenames in GJAMDATA/Witheld For Validation/X or Y, output saves both X and Y in a .Rdata file
+3. yes; dimensions and content match
+4. yes
+5. yes
+6. yes; formats data and packages it for validation
+## 3.Combine_marea.R
+Matches the random effects from the closest in sample management area for each validation area
+1. yes, no author
+2. yes, load() and save()
+3. yes, output dimensions and content 
+4. yes
+5. yes, centers in figure appear to be centers of management areas, second figure management areas appear to match the first
+6. yes
+## 4.Reduce.R
+Reduces the dimensionality of the dataset by lumping certain taxa
+1. yes
+2. yes, load() and save()
+3. the output file is saved under a temporary numbered version (as the comment indicates) 'GJAMDATA/processed_xydata_2.RData', not the final file name that is stated in the readme
+4. yes
+5. yes
+6. yes
+## 4.Reduce_ecosystem.R
+Converts composition to ecosystem state (forest, savanna, prairie)
+1. yes
+2. yes, load() and save()
+3. temporary output named in this script as well, does not match README
+4. yes
+5. yes
+6. yes, other than mislabeled output
+## 5.Reduce_oos.R
+reduces taxa dimensionality for the oos data
+1. yes
+2. yes, load() and save()
+3. yes, dimensions and content match
+4. yes
+5. yes
+6. yes
+## 5.Reduce_oos_ecosystem.R
+Converts from composition to biome as in 4.Reduce_ecosystem.R
+1. yes
+2. yes, load() and save()
+3. yes, dimensions and content match
+4. yes
+5. yes
+6. yes
+## 6.Run
+This folder contains the scripts for running the simulations. This code was not run, but was checked through for consistency. Formulas match
+## 7.Combine.R
+Combining replicate MCMC chains into a usable format for analysis
+1. yes
+2. source() and reads in files based on name in directory
+3. yes
+4. yes
+5. yes
+6. produces trace plots and convergence diagnostics for the chains, almost all converged but some intercepts
+## 8.Visualize.R
+Produces figures for analysis
+1. yes
+2. yes, load(), only figures produced
+3. n/a
+4. yes
+5. yes, produces analysis figures for the file specified on line 11
+6. yes
+## 9.Predict_oos.R
+uses one of the model runs (selected by commenting line) to predict out of sample
+1. yes
+2. yes, no outputs, just visualizations
+3. yes
+4. yes, requires selecting the model and matching dataset at the beginning
+5. yes, produces figures of prediction and comparison
+6. yes, produces analysis for ecosystem and taxon level, no covariance, oos experiment
+## 9.Predict_oos_conditional.R
+1. yes
+2. yes, for loop skipped bc it took a long time, data loaded for analysis
+3. yes
+4. yes
+5. yes
+6. yes, models w covariance certainly perform better according to R^2 metric and visualizations
+## utils.R
+matches README, manual statistics calculation

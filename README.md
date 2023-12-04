@@ -50,6 +50,9 @@ This repository is entirely built in the R environment using R version 4.3.1.
 * out: **Outputs** of the GJAM model are available in this directory. Any data or outputs not included in the repository are available upon request at this time. Processing for the data inputs to this repository are avaialble from the following repository:
   * <https://github.com/ian-shuman/GJAMCovariates.git>: produces point-level reconstructions of environmental covariates
 * R: The bulk of the repository is housed in the R subdirectory. The scripts within the R subdirectory are ordered according to the sequence of steps that should be taken to recreate the analysis. Descriptions of each step are presented in the following subsection, and should be run in the order presented, except step 0 must follow step 1.
+* Review: Documents related to an code review conducted prior to submitting the associated manuscript for publication. The documents are as follows:
+  * Code Reivew Checklist - GJAM - AW-CK - Notre Dame Checklist.pdf: A filled out rubric pertaining to reviewing the code, workflow, and statistical methodology of the manuscript associated with this paper. The checklist was jointly written by current members of the McLachlan Lab at the University of Notre Dame as of December 2023 (Jason McLachlan, Alyssa Willson, Jody Peters, Cazimir Kowalski, Nate Kroeze, Hannah O'Grady). The "author checklist" and "author notes" sections were filled out by Alyssa Willson and the "reviewer checklist" and "reviewer notes" were filled out by Cazimir Kowalski.
+  * ck_review.Rmd: additional notes related to the code review conducted by C. Kowalski
 
 ## Code organization
 
