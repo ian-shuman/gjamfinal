@@ -82,9 +82,18 @@ ydata_all_comb <- rbind(ydata_all_comb, ydata_all_comb_uncond)
 xdata_ind <- rbind(xdata_uncond_ind, xdata_oos_ind)
 xdata <- rbind(xdata_uncond, xdata_oos)
 
+#Make management area labels
+lat <- c(42.24945, 39.18589, 41.09169, 40.84533, 40.11273, 40.0646, 39.85929, 38.06713, 38.73074, 40.08565, 42.00343, 41.86646, 41.51992, 39.34596, 39.26155, 38.17247, 39.19557, 38.67208, 38.16165, 39.7774, 41.5106, 40.77276)
+long <- c(-90.01636, -87.87319, -90.06282, -87.86425, -88.66883, -90.73644, -90.21972, -88.65333, -89.82326, -87.74809, -89.27698, -88.11244, -86.91481, -86.76891, -85.44225, -87.28007, -86.15017, -86.65414, -86.57263, -86.24079, -85.45621, -87.22381)
+Area <- c(1:22)
+MA_labels <- as.data.frame(cbind(Area, lat, long))
+MA_labels <- sf::st_as_sf(MA_labels, coords = c('lat', 'long'))
+sf::st_crs(MA_labels) <- 'EPSG:4326'
 ## Plot
 
 #Plot Ecosystem state
+
+
 ydata_eco_comb |>
   tidyr::pivot_longer(Prairie:Forest, names_to = 'Ecosystem', values_to = 'Presence') |>
   dplyr::filter(Presence == 1) |>
@@ -93,6 +102,7 @@ ydata_eco_comb |>
   ggplot2::scale_color_manual(values = c('Prairie' = '#bb5566', 'Savanna' = '#ddaa34', 'Forest' = '#002a53')) +
   ggplot2::labs(color = 'Ecosystem State') +
   ggplot2::guides(color = guide_legend(override.aes = list(shape = 16, size = 7))) +
+  ggplot2::geom_text(data = MA_labels, aes(x = long, y = lat, label = Area), color = "black", size = 5, fontface = "bold")+
   ggplot2::geom_polygon(data = states, aes(x = long, y = lat, group = group), color = 'black', fill = NA) +
   ggplot2::coord_map(projection = 'albers', lat0 = 45.5, lat1 = 29.5) +
   ggplot2::theme_void() +
@@ -106,6 +116,9 @@ pal <- c('#bb5566',
          '#ddaa34', '#ecd08f',
          '#002a53', '#004488', '#4c7cac', '#8aa9c8', '#c2d2e2', '#dee7f0',
          '#005f5f', '#008b8b', '#38a5a5', '#63b9b9', '#8ecdcd', '#c1e4e4')
+
+
+
 
 ydata_all_comb |>
   tidyr::pivot_longer(1:15, names_to = 'Taxon', values_to = 'Presence') |>
