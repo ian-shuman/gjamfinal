@@ -4,6 +4,12 @@
 ## Authors: I Shuman & AM Willson
 
 rm(list = ls())
+library(sf)
+library(tibble)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(viridis)
 
 # Map of study region for plotting
 states <- sf::st_as_sf(maps::map('state', region = c('illinois', 'indiana'),
