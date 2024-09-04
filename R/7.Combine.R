@@ -9,6 +9,10 @@
 
 rm(list = ls())
 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
 # load R script with modified version of gelman statistic
 source('R/utils.R')
 
@@ -19,7 +23,7 @@ source('R/utils.R')
   # Reduced_taxa~all_cov_ASPECT
   # Reduced_taxa~all_cov_NOASPECT
 
-type <- 'All_taxa~all_cov_ASPECT'
+type <- 'All_taxa~all_cov_NOASPECT'
 
 # List all the outputs we have for that model
 files <- list.files(path = paste0('out/', type))
