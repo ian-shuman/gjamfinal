@@ -4,6 +4,8 @@
 
 rm(list = ls())
 
+library(dplyr)
+
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
 
 # Convert to ecosystems as in 3.Reduce_ecosystem.R
