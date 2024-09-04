@@ -4,6 +4,10 @@
 
 rm(list = ls())
 
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
 load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea.RData')
 
 new.ydata <- ydata_oos |>
