@@ -4,6 +4,10 @@
 
 rm(list = ls())
 
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
 load('GJAMDATA/processed_xydata.RData')
 
 new.ydata <- ydata |>
