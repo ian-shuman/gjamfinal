@@ -4,6 +4,10 @@
 
 rm(list = ls())
 
+library(dplyr)
+library(tibble)
+library(tidyr)
+
 # Read in file names that we need to loop over
 ## These data can be accessed in the repository listed in
 ## the corresponding publication
