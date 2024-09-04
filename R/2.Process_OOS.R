@@ -5,6 +5,10 @@
 
 rm(list = ls())
 
+library(dplyr)
+library(tibble)
+library(tidyr)
+
 #### STEP 1 ####
 
 ## This section just formats the data, focusing mainly on
