@@ -18,10 +18,10 @@ source('R/utils.R')
 
 # Specify which model you were using
 # Options:
-  # All_taxa~all_cov_ASPECT
-  # All_taxa~all_cov_NOASPECT
-  # Reduced_taxa~all_cov_ASPECT
-  # Reduced_taxa~all_cov_NOASPECT
+# All_taxa~all_cov_ASPECT
+# All_taxa~all_cov_NOASPECT
+# Reduced_taxa~all_cov_ASPECT
+# Reduced_taxa~all_cov_NOASPECT
 
 type <- 'All_taxa~all_cov_NOASPECT'
 
@@ -500,15 +500,15 @@ if(type == 'Reduced_taxa~all_cov_NOASPECT'){
 
 if(type %in% c('Reduced_taxa~all_cov_ASPECT', 'All_taxa~all_cov_ASPECT', 'All_taxa~all_cov_NOASPECT')){
   bgibbsUn |>
-  dplyr::select(c(colnames(bgibbsUn)[21:40], iter, chain)) |>
-  tidyr::pivot_longer(colnames(bgibbsUn)[21:40],
-                      names_to = 'beta', values_to = 'estimate') |>
-  ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
-  ggplot2::geom_line(show.legend = F) +
-  ggplot2::facet_wrap(~beta, scales = 'free') +
-  ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
-  ggplot2::theme_minimal() +
-  ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
+    dplyr::select(c(colnames(bgibbsUn)[21:40], iter, chain)) |>
+    tidyr::pivot_longer(colnames(bgibbsUn)[21:40],
+                        names_to = 'beta', values_to = 'estimate') |>
+    ggplot2::ggplot(ggplot2::aes(x = iter, y = estimate, color = as.factor(chain))) +
+    ggplot2::geom_line(show.legend = F) +
+    ggplot2::facet_wrap(~beta, scales = 'free') +
+    ggplot2::xlab('Iteration') + ggplot2::ylab('Coefficient Estimate') +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_color_manual(values = c('#090c10', '#004488', '#ddaa34', '#bb5566'))
 }
 
 if(type == 'Reduced_taxa~all_cov_ASPECT'){
