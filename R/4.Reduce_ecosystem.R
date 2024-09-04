@@ -4,6 +4,8 @@
 
 rm(list = ls())
 
+library(dplyr)
+
 load('GJAMDATA/processed_xydata_2.RData')
 
 # Reduce ydata to have only savanna/prairie/forest taxa
