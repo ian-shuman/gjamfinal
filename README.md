@@ -199,10 +199,12 @@ This repository is entirely built in the R environment using R version 4.3.1.
     * fSensGibbs: dataframe with 3200 samples. Number of columns differs according to the number of parameters in the specified model. Columns are the covariance between X and the responses they elicit from Y. See Clark et al. (2017) for more information. Also includes chain (1-4) and iter (201-1000) columns for the MCMC chain and MCMC iteration. iter starts at 201 because burn-in has already been removed.
     * sgibbs: dataframe with 3200 samples. Number of columns differs according to the number of parameters in the specified model. Columns are covariances between response variables. See Clark et al. (2017) for more information. Also includes chain (1-4) and iter (201-1000) columns for the MCMC chain and MCMC iteration. iter starts at 201 because burn-in has already been removed.
     
-* **8.Visualize.R**: This script produces figures used in Shuman et al. (in prep) for both community-level and biome-level runs, depending on the input called into the script and the designation of "all" (community-level) or "reduced" (biome-level) at the beginning of the script. The script uses the output of 7.Combine.R, but the specific input depends on the simulation of interest.
+* **8.Visualize.R**: This script produces figures used in Shuman et al. (in prep) for both community-level and biome-level runs, depending on the input called into the script and the designation of "all" (community-level) or "reduced" (ecosystem-level) at the beginning of the script. The script uses the output of 7.Combine.R, but the specific input depends on the simulation of interest.
   * Inputs: combined.RData file from the specified subdirectory of the out/ folder. The file is specified by modifying line 11.
-  * Outputs: none. Figures produced
-
+  * Outputs: Figures produced. Additionally, the correlation plots produced near the end of the script are saved and used within this script to produce a multi-panel correlation plot figure (line 776) depicting the results from both the "all" (community-level) and "reduced" (ecosystem-level) designations together. Those saved objects are:
+    * out/all_taxa_corrplot.RData
+    * out/reduced_taxa_corrplot.RData
+   
 * **9.Predict_OOS.R**: This script uses the model fit of one of the simulations from 6.Run to predict the out-of-sample data. The type of prediction here predicts the response variable only from the environmental covariate sand does not take into account the covariance between taxa or biomes. Visualization is included in the same script.
   * Inputs:
     * The global environment RData file for the first chain of any of the four model runs. The first chain is specified as follows, using the All_taxa\~all_cov_ASPECT model run type as an example: out/All_taxa\~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RD ta
@@ -220,6 +222,14 @@ This repository is entirely built in the R environment using R version 4.3.1.
   * Outputs: the validation is computationally intensive, so the out-of-sample prediction for the All_taxa~all_cov_NOASPECT and Reduced_taxa~all_cov_NOASPECT model run type are saved as intermediate outputs as follows:
     * out/cond_pred_all_taxa.RData: conditional prediction with All_taxa model run type
     * out/cond_pred_reduced_taxa.RData: conditional prediction with Reduced_taxa model run type
+ 
+* **10.Visualize_OOS.R**: This script produces statistics and figures reported in Shuman et al. (in prep) for assessing the prediction ability of the ecosystem-level and taxon-level out-of-sample (OOS) experiments, depending on the input called into the script and the designation of "all" (community-level) or "reduced" (ecosystem-level) at the beginning of the script. The script uses the outputs of 9.Predict_OOS.R and 9.Predict_OOS_conditional.R, but the specific input depends on the simulation of interest.
+  * Inputs: File from the out/ folder. The exact files are specified by designating the "type" as "all" (community-level) or "reduced" (ecosystem-level):
+    * comp_envi_all.rds
+    * comp_MES_all.rds
+    * comp_envi_reduced.rds
+    * comp_MES_reduced.rds
+  * Outputs: none. Statistics and figures produced
     
 * **utils.R**: This script contains utility functions for the code. Specifically, there is a function for manually calculating the Gelman Rubin diagnostic for assessing chain convergence because our output is not in the proper format to use the default functions available in R. I additionally removed any identical chains (usually 2/4) from the output prior to calculating the diagnostic statistic. The identical chains are an artifact of the gjam function and cannot be avoided to the authors' knowledge. Removing the identical chains offers a more conservative view of chain convergence.
   
