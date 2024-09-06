@@ -18,12 +18,12 @@ library(patchwork)
 # Should load the "combined.RData" file in the
 # subfolder of the "out" directory corresponding to the
 # model of interest
-load('out/Reduced_taxa~all_cov_NOASPECT/combined.RData')
+load('out/All_taxa~all_cov_NOASPECT/combined.RData')
 
 ## All figures are produced for the "no aspect" simulations but  could
 ## easily be modified to include aspect
 
-type <- 'reduced' # reduced or all
+type <- 'all' # reduced or all
 
 ## Correlations between taxa and drivers
 
@@ -120,7 +120,7 @@ if(type == 'all'){
                nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
+                                'Oak', 'Hickory',
                                 'Ash', 'Basswood', 'Beech',
                                 'Black gum/sweet gum',
                                 'Dogwood', 'Elm',
@@ -128,7 +128,7 @@ if(type == 'all'){
                                 'Other hardwood', 'Poplar/tulip poplar',
                                 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood', 'Beech',
                                   'Black gum/sweet gum',
                                   'Dogwood', 'Elm',
@@ -137,7 +137,7 @@ if(type == 'all'){
                                   'Walnut'),
                        values = pal) +
     ggplot2::scale_fill_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood', 'Beech',
                                   'Black gum/sweet gum',
                                   'Dogwood', 'Elm',
@@ -166,7 +166,7 @@ if(type == 'all'){
                nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
+                                'Oak', 'Hickory',
                                 'Ash', 'Basswood', 'Beech',
                                 'Black gum/sweet gum',
                                 'Dogwood', 'Elm',
@@ -174,7 +174,7 @@ if(type == 'all'){
                                 'Other hardwood', 'Poplar/tulip poplar',
                                 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood',
                                   'Beech', 'Black gum/sweet gum',
                                   'Dogwood', 'Elm',
@@ -271,7 +271,7 @@ if(type == 'all'){
                nrow = 4, ncol = 3) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimates') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
+                                'Oak', 'Hickory',
                                 'Ash', 'Basswood', 'Beech',
                                 'Black gum/sweet gum',
                                 'Dogwood', 'Elm',
@@ -279,7 +279,7 @@ if(type == 'all'){
                                 'Other hardwood', 'Poplar/tulip poplar',
                                 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood', 'Beech',
                                   'Black gum/sweet gum',
                                   'Dogwood', 'Elm',
@@ -288,7 +288,7 @@ if(type == 'all'){
                                   'Walnut'),
                        values = pal) +
     ggplot2::scale_fill_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood', 'Beech',
                                   'Black gum/sweet gum',
                                   'Dogwood', 'Elm',
@@ -315,7 +315,7 @@ if(type == 'all'){
                                              'mean.SWI', 'Slope', 'FloodplainYes')), labeller = my_labeller, scales = 'fixed') +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
+                                'Oak', 'Hickory',
                                 'Ash', 'Basswood',
                                 'Beech', 'Black gum/sweet gum',
                                 'Dogwood', 'Elm', 'Ironwood',
@@ -323,7 +323,7 @@ if(type == 'all'){
                                 'Other hardwood',
                                 'Poplar/tulip poplar', 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood',
                                   'Beech', 'Black gum/sweet gum',
                                   'Dogwood', 'Elm', 'Ironwood',
@@ -432,7 +432,7 @@ if(type == 'all'){
                nrow = 3, ncol = 2) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimates') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
+                                'Oak', 'Hickory',
                                 'Ash', 'Basswood', 'Beech',
                                 'Black gum/sweet gum',
                                 'Dogwood', 'Elm',
@@ -440,7 +440,7 @@ if(type == 'all'){
                                 'Other hardwood', 'Poplar/tulip poplar',
                                 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood', 'Beech',
                                   'Black gum/sweet gum',
                                   'Dogwood', 'Elm',
@@ -449,7 +449,7 @@ if(type == 'all'){
                                   'Walnut'),
                        values = pal) +
     ggplot2::scale_fill_manual(limits = c('No tree',
-                                           'Hickory', 'Oak',
+                                           'Oak', 'Hickory',
                                            'Ash', 'Basswood', 'Beech',
                                            'Black gum/sweet gum',
                                            'Dogwood', 'Elm',
@@ -475,7 +475,7 @@ if(type == 'all'){
                                              'CEC', 'FloodplainYes', 'CLA', 'HydricYes')), labeller = my_labeller, scales = 'free_y', nrow = 3, ncol = 2) +
     ggplot2::xlab('') + ggplot2::ylab('Coefficient estimate') +
     ggplot2::scale_x_discrete(limits = c('No tree',
-                                'Hickory', 'Oak',
+                                'Oak', 'Hickory',
                                 'Ash', 'Basswood',
                                 'Beech', 'Black gum/sweet gum',
                                 'Dogwood', 'Elm', 'Ironwood',
@@ -483,7 +483,7 @@ if(type == 'all'){
                                 'Other hardwood',
                                 'Poplar/tulip poplar', 'Walnut')) +
     ggplot2::scale_color_manual(limits = c('No tree',
-                                  'Hickory', 'Oak',
+                                  'Oak', 'Hickory',
                                   'Ash', 'Basswood',
                                   'Beech', 'Black gum/sweet gum',
                                   'Dogwood', 'Elm', 'Ironwood',
