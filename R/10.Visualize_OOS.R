@@ -1,4 +1,4 @@
-## Figures associated with OOS prediction in Shuman et al. publication in prep
+## Figures and statistics associated with OOS prediction in Shuman et al. publication in prep
 
 ## Author: I Shuman
 
