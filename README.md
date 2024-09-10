@@ -29,6 +29,12 @@ This repository is entirely built in the R environment using R version 4.3.1.
 * `tidyr` v. 1.3.0
 * `utils` v 4.3.1
 * `virids` v. 0.6.3
+* `readr` v. 2.1.5
+* `plyr` v. 1.8.9
+* `RColorBrewer` v. 1.1-3
+* `gridGraphics` v. 0.5-1
+* `patchwork` v. 1.2.0
+* `pROC` v. 1.18.5
 
 # Directory structure
 
@@ -211,7 +217,13 @@ This repository is entirely built in the R environment using R version 4.3.1.
     * The out-of-sample data that fits the model run type. One of the following:
       * GJAMDATA/Withheld for Validation/validation_processed_xydata_fixmarea_reduced.R ata: for All_taxa model runs 
       * GJAMDATA/Withheld for Validation/validation_processed_xydata_fixmarea_reduced_e ecosystem.RData for Reduced_taxa model runs
-  * Outputs: none saved. This is the last step, so all analyses of the validation are done in the same step
+  * Outputs:
+    * Objects are saved to be used when calculating the number of corners predicted correctly/incorrectly in 10.Visualize_OOS.R
+      * out/comp_envi_all.rds: non-conditional predictions at the taxon-level
+      * out/comp_envi_reduced.rds: non-conditional predictions at the ecosystem-level
+    * Objects are saved to create a multi-panel plot with the predicted prbability of presence for both the unconditional and conditional OOS experiments
+     * out/OOS_uncond_all.RData: unconditional probability of presence predictions at the taxon-level 
+     * out/OOS_uncond_reduced.RData unconditional probability of presence predictions at the ecosystem-level 
 
 * **9.Predict_OOS_conditional.R**: This script is similar to 9.Predict_OOS.R and uses the same inputs. The difference is that the type of prediction implemented in this script accounts for the covariance between taxa or ecosystem types, which we hypothesize will improve prediction.
   * Inputs:
@@ -219,9 +231,16 @@ This repository is entirely built in the R environment using R version 4.3.1.
     * The out-of-sample data that fits the model run type. One of the following
       * GJAMDATA/Withheld for Validation/validation_processed_xydata_fixmarea_reduced.R ata: for All_taxa model runs
       * GJAMDATA/Withheld for Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.Rdata for Reduced_taxa model runs
-  * Outputs: the validation is computationally intensive, so the out-of-sample prediction for the All_taxa~all_cov_NOASPECT and Reduced_taxa~all_cov_NOASPECT model run type are saved as intermediate outputs as follows:
-    * out/cond_pred_all_taxa.RData: conditional prediction with All_taxa model run type
-    * out/cond_pred_reduced_taxa.RData: conditional prediction with Reduced_taxa model run type
+  * Outputs:
+    * The validation is computationally intensive, so the out-of-sample prediction for the All_taxa~all_cov_NOASPECT and Reduced_taxa~all_cov_NOASPECT model run type are saved as intermediate outputs as follows:
+      * out/cond_pred_all_taxa.RData: conditional prediction with All_taxa model run type
+      * out/cond_pred_reduced_taxa.RData: conditional prediction with Reduced_taxa model run type
+    * Objects are saved to be used when calculating the number of corners predicted correctly/incorrectly in 10.Visualize_OOS.R
+      * out/comp_MES_all.rds: conditional predictions at the taxon-level
+      * out/comp_MES_reduced.rds: conditional predictions at the ecosystem-level
+    * Objects are saved to create a multi-panel plot with the predicted prbability of presence for both the unconditional and conditional OOS experiments
+     * out/OOS_cond_all.RData: conditional probability of presence predictions at the taxon-level 
+     * out/OOS_cond_reduced.RData conditional probability of presence predictions at the ecosystem-level 
  
 * **10.Visualize_OOS.R**: This script produces statistics and figures reported in Shuman et al. (in prep) for assessing the prediction ability of the ecosystem-level and taxon-level out-of-sample (OOS) experiments, depending on the input called into the script and the designation of "all" (community-level) or "reduced" (ecosystem-level) at the beginning of the script. The script uses the outputs of 9.Predict_OOS.R and 9.Predict_OOS_conditional.R, but the specific input depends on the simulation of interest.
   * Inputs: File from the out/ folder. The exact files are specified by designating the "type" as "all" (community-level) or "reduced" (ecosystem-level):
