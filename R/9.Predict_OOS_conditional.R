@@ -1,19 +1,33 @@
 ## Conditional prediction
+## Can be run for either all taxa or ecosystem level
 
+## Author: AM Willson & I Shuman
+
+#getAnywhere(".gjamPrediction") for source code on gjamPredict
 rm(list = ls())
+
+library(gjam)
+library(lme4)
+library(piecewiseSEM)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(tibble)
+library(pROC)
+library(cowplot)
 
 # Load output from GJAM
 #load('out/All_taxa~all_cov_ASPECT/all_taxa-all_cov_ASPECT_1.RData')
-load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData')
+load('out/All_taxa~all_cov_NOASPECT/all_taxa-all_cov_NOASPECT_1.RData') #Use this one for taxon-level final results
 #load('out/Reduced_taxa~all_cov_ASPECT/reduced_taxa-all_cov_ASPECT_1.RData')
-#load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData')
+#load('out/Reduced_taxa~all_cov_NOASPECT/reduced_taxa-all_cov_NOASPECT_1.RData') #Use this one for ecosystem-level final results
 
 # Clean up environment to make sure we are predicting correct data
 rm(edata, mlist, xdata, ydata, site_effort)
 
 # Load out of sample data
-load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData')
-#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData')
+load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced.RData') #Use this one for taxon-level final results
+#load('GJAMDATA/Withheld For Validation/validation_processed_xydata_fixmarea_reduced_ecosystem.RData') #Use this one for ecosystem-level final results
 
 # Specify whether all taxa or reduced taxa
 type <- 'all'
@@ -91,7 +105,7 @@ if(type == 'all'){
     dplyr::mutate(lat = xdata$lat,
                   lon = xdata$long) |>
     # Make easier to plot
-    tidyr::pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Presence') |>
+    tidyr::pivot_longer(Elm:Other.hardwood, names_to = 'Taxon', values_to = 'Presence') |>
     # Make taxon names easier to read
     dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
                   Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
@@ -100,7 +114,7 @@ if(type == 'all'){
                   Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
     # Plot presence over space
     ggplot2::ggplot() +
-    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Presence)) +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Presence), shape = ".") +
     ggplot2::facet_wrap(~Taxon, nrow = 3, ncol = 5) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
@@ -117,7 +131,7 @@ if(type == 'reduced'){
                   lon = xdata$long) |>
     tidyr::pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Presence') |>
     ggplot2::ggplot() +
-    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Presence)) +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Presence), shape = ".") +
     ggplot2::facet_wrap(~Ecosystem) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
@@ -130,18 +144,20 @@ if(type == 'reduced'){
 
 # Do the same with the probability of presence
 ## This actually represents the probability of presence at a given location
+
+#Plot probability of presence for all regions 
 if(type == 'all'){
-  pred_pr |>
+  OOS_cond_all = pred_pr |>
     dplyr::mutate(lat = xdata$lat,
                   lon = xdata$lon) |>
-    tidyr::pivot_longer(No.tree:Other.hardwood, names_to = 'Taxon', values_to = 'Probability') |>
+    tidyr::pivot_longer(Elm:Other.hardwood, names_to = 'Taxon', values_to = 'Probability') |>
     dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
                   Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
                   Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
                   Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
                   Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon)) |>
     ggplot2::ggplot() +
-    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability)) +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability), shape = ".") +
     ggplot2::facet_wrap(~Taxon, nrow = 3, ncol = 5) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
@@ -150,25 +166,125 @@ if(type == 'all'){
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
                    legend.title = ggplot2::element_text(size = 14),
                    legend.text = ggplot2::element_text(size = 12))
+  OOS_cond_all
 }
 if(type == 'reduced'){
-  pred_pr |>
+  OOS_cond_reduced = pred_pr |>
     dplyr::mutate(lat = xdata$lat,
                   lon = xdata$lon) |>
     tidyr::pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Probability') |>
     ggplot2::ggplot() +
-    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability)) +
-    ggplot2::facet_wrap(~Ecosystem) +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability), shape = ".") +
+    ggplot2::facet_wrap(~factor(Ecosystem, levels = c("Prairie", "Savanna", "Forest"))) +
     ggplot2::scale_color_viridis_c(option = 'A') +
     ggplot2::theme_void() +
-    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
+    ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 0.5) +
     ggplot2::coord_sf(crs = 'EPSG:4326') +
     ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
                    legend.title = ggplot2::element_text(size = 14),
                    legend.text = ggplot2::element_text(size = 12))
+  OOS_cond_reduced
+
 }
 
-# Now compare with observation
+#Save for multi-panel plotting 
+if(type == 'reduced'){
+  save(OOS_cond_reduced, file = "out/OOS_cond_reduced.RData")
+}
+if(type == 'all'){
+  save(OOS_cond_all, file = "out/OOS_cond_all.RData")
+}
+
+
+#Create multi-panel plot after running 8.Predict_OOS.R with type = "reduced" and saving 
+if(type == 'reduced'){
+  load("out/OOS_cond_reduced.RData")
+  load("out/OOS_uncond_reduced.RData")
+  cowplot::plot_grid(OOS_uncond_reduced, OOS_cond_reduced, labels = c("Unconditional", "Conditional"), nrow = 2)
+}
+if(type == 'all'){
+  load("out/OOS_cond_all.RData")
+  load("out/OOS_uncond_all.RData")
+  cowplot::plot_grid(OOS_uncond_all, OOS_cond_all, labels = c("Unconditional", "Conditional"), nrow = 2)
+}
+
+#Plot specific management areas and taxa for use in Figure 5.B-E and Supplement
+#Areas highlighted in main text for AOI = "IL_River1" and "IN_Forest4"
+#Aesthetics of specific management areas may vary (see below for recommendations)
+
+#Set user parameters
+AOI <- "IN_Forest4" #Some management area of interest from the following list: c("IL_Forest1", "IL_River1", "IL_Small2", "IN_Forest3", "IN_Forest4", "IN_Indianapolis", "IN_Prairie1")
+if(type == 'all'){
+  taxa <- c("Beech", "Oak") #Some taxa of interest from the following list: c("No.tree", "Oak", "Elm", "Hickory", "Ash", "Maple", "Basswood", "Walnut", "Ironwood", "Beech", "Dogwood", "Poplar.tulip.poplar", "Black.gum.sweet.gum", "Other.conifer", "Other.hardwood")
+}
+
+#Convert taxa user parameter into column numbers
+if(type == 'all'){
+  convert_to_col_numbers <- function(char_vector, data_frame) {
+    col_names <- colnames(data_frame)
+    col_numbers <- match(char_vector, col_names) + 1
+    return(col_numbers)
+  }
+  TOI <- convert_to_col_numbers(taxa, pred_pr)
+}
+
+#Plot with specified management areas/taxa
+if(type == 'reduced'){
+  pred_pr_long <- pred_pr |>
+    dplyr::mutate(Index = rownames(ydata_oos)) |>
+    tidyr::pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Probability')
+  pred_pr_zoomed <- dplyr::filter(pred_pr_long, grepl(paste0(AOI), pred_pr_long$Index) == TRUE)
+  zoomed_wide <- tidyr::pivot_wider(pred_pr_zoomed, names_from = "Ecosystem", values_from = "Probability")
+  xdata_zoomed <- dplyr::filter(xdata, grepl(paste0(AOI), rownames(xdata)) == TRUE)
+  zoomed_wide |>
+    dplyr::mutate(lat = xdata_zoomed$lat,
+           lon = xdata_zoomed$long) |>
+    tidyr::pivot_longer(Prairie:Savanna, names_to = 'Ecosystem', values_to = 'Probability') |>
+    ggplot2::ggplot() +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability), size = 0.9) +
+    ggplot2::facet_wrap(~factor(Ecosystem, levels = c("Prairie", "Savanna", "Forest"))) +
+    ggplot2::scale_color_viridis_c(option = 'A') +
+    ggplot2::theme_void() +
+    ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+          legend.title = ggplot2::element_text(size = 14),
+          legend.text = ggplot2::element_text(size = 12))
+}
+
+if(type == 'all'){
+  pred_pr_long <- pred_pr |>
+    dplyr::mutate(Index = rownames(ydata_oos)) |>
+    tidyr::pivot_longer(Elm:Other.hardwood, names_to = 'Taxon', values_to = 'Probability')
+  pred_pr_zoomed <- dplyr::filter(pred_pr_long, grepl(paste0(AOI), pred_pr_long$Index) == TRUE)
+  zoomed_wide <- tidyr::pivot_wider(pred_pr_zoomed, names_from = "Taxon", values_from = "Probability")
+  xdata_zoomed <- dplyr::filter(xdata, grepl(paste0(AOI), rownames(xdata)) == TRUE)
+  zoomed_wide <- zoomed_wide |>
+    dplyr::mutate(lat = xdata_zoomed$lat,
+           lon = xdata_zoomed$long) |>
+    tidyr::pivot_longer(TOI, names_to = 'Taxon', values_to = 'Probability') |>
+    dplyr::mutate(Taxon = dplyr::if_else(Taxon == 'Black.gum.sweet.gum', 'Black Gum/\nSweet Gum', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'No.tree', 'No Tree', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.conifer', 'Other Conifer', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Other.hardwood', 'Other Hardwood', Taxon),
+                  Taxon = dplyr::if_else(Taxon == 'Poplar.tulip.poplar', 'Poplar/\nTulip Poplar', Taxon))
+  max_prob <- max(zoomed_wide$Probability)
+  zoomed_wide |>
+    ggplot2::ggplot() +
+    ggplot2::geom_point(ggplot2::aes(x = lon, y = lat, color = Probability), size = 1.4) +
+    ggplot2::coord_fixed()+
+    ggplot2::facet_wrap(~Taxon, nrow = 2, ncol = 2) +
+    ggplot2::scale_color_viridis_c(option = 'A', limits = c(0, max_prob)) + 
+    ggplot2::theme_void() +
+    ggplot2::theme(strip.text = ggplot2::element_text(size = 14, face = 'bold'),
+          legend.title = ggplot2::element_text(size = 14),
+          legend.text = ggplot2::element_text(size = 12))
+}
+
+#Aesthetic recommendations for plotting different management areas of interest: 
+#For IL_River1, use "Oak" and "No.tree" taxa with geom_point(size = 0.5) for visualization
+#For IN_Forest4, use "Oak" and "Beech" taxa with geom_point(size = 1.4) for visualization
+
+
+# Now compare with observation (for all management areas and taxa)
 if(type == 'all'){
   pred_yMu_long <- pred_yMu |>
     # Add index of each corner in each management area from ydata
@@ -251,6 +367,17 @@ if(type == 'reduced'){
                    axis.title = ggplot2::element_text(size = 14),
                    axis.text = ggplot2::element_text(size = 12))
 }
+
+
+#Calculate OvR AUC Score for Ecosystem Level (does not make sense for Taxon level, as multiple taxa can be present at a single point)
+if(type == 'reduced'){
+  Observed <- comp$Ecosystem[comp$Observed == 1]
+  AUC_df <- cbind(pred_pr, Observed)
+  AUC_object <- pROC::multiclass.roc(AUC_df$Observed, AUC_df[,1:3])
+  AUC_object
+  #AUC of reduced conditional is 0.9942
+}
+
 
 # Overall model
 form <- stats::glm(Observed ~ Probability, family = binomial, data = comp)
@@ -369,6 +496,18 @@ if(type == 'reduced'){
   print(paste('forest:', with(summary(form_forest), 1 - deviance/null.deviance)))
 }
 
+### Save for use in 9.Visualize_OOS.R to calculate the number of cells correctly/incorrectly predicted by the OOS experiments
+comp_MES <- comp
+comp_MES$difference <- comp_MES$Observed - comp_MES$Probability
+
+if(type == 'all'){
+  saveRDS(comp_MES, file = "out/comp_MES_all.rds")
+}
+if(type == 'reduced'){
+  saveRDS(comp_MES, file = "out/comp_MES_reduced.rds")
+}
+
+
 # Difference between probability of presence and observed presence/absence over space
 if(type == 'all'){
   xdata <- xdata |>
@@ -377,15 +516,15 @@ if(type == 'all'){
     dplyr::left_join(xdata, by = 'Index') |>
     dplyr::select(c('Taxon', 'Probability', 'Predicted', 'Observed', 'lat', 'long'))
   
-  # color interpretation:
-  # near 0 (white) = probability nearly matches observation
-  # near 1 (red) = high probability of presence when absent
-  # near -1 (blue) = high probability of absence when present
+  # Color interpretation:
+  # near 0 (white) = probability nearly matches observation (true positive/negative)
+  # near 1 (red) = low probability of presence when present (false negative)
+  # near -1 (blue) = high probability of presence when absent (false positive)
   comp |>
     dplyr::mutate(difference = Observed - Probability) |>
     ggplot2::ggplot() +
-    ggplot2::geom_point(alpha = 0.7, ggplot2::aes(x = long, y = lat, color = difference)) +
-    ggplot2::facet_wrap(~Taxon) +
+    ggplot2::geom_point(alpha = 0.7, ggplot2::aes(x = long, y = lat, color = difference, shape = ".")) +
+    ggplot2::facet_wrap(~Taxon, nrow = 3, ncol = 5) +
     ggplot2::scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
     ggplot2::theme_void() +
     ggplot2::geom_sf(data = states, color = 'black', fill = NA, linewidth = 1) +
@@ -403,13 +542,13 @@ if(type == 'reduced'){
     dplyr::select(c('Ecosystem', 'Probability', 'Predicted', 'Observed', 'lat', 'long'))
   
   # Color interpretation:
-  # near 0 (white) = probability nearly matches observation
-  # near 1 (red) = high probability of presence when absent
-  # near -1 (blue) = high probability of absence when present
+  # near 0 (white) = probability nearly matches observation (true positive/negative)
+  # near 1 (red) = low probability of presence when present (false negative)
+  # near -1 (blue) = high probability of presence when absent (false positive)
   comp |>
     dplyr::mutate(difference = Observed - Probability) |>
     ggplot2::ggplot() +
-    ggplot2::geom_point(alpha = 0.7, ggplot2::aes(x = long, y = lat, color = difference)) +
+    ggplot2::geom_point(shape = ".", alpha = 0.7, ggplot2::aes(x = long, y = lat, color = difference, shape = ".")) +
     ggplot2::facet_wrap(~Ecosystem) +
     ggplot2::scale_color_distiller(palette = 'RdBu', limits = c(-1, 1)) +
     ggplot2::theme_void() +
